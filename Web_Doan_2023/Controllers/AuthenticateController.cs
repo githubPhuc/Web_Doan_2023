@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -353,6 +354,11 @@ namespace Web_Doan_2023.Controllers
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Username,
+                IdUser = model.Username,
+                PhoneNumber = model.Phone,
+                City = model.Cyti,
+                District = model.District,
+                Wards = model.Wards,
                 AccoutType = "Admin",
                 Fullname = model.FullName,
                 ShippingAddress = model.ShippingAddress,

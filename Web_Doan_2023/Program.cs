@@ -25,11 +25,9 @@ builder.Services.AddCors(options =>
             builder.WithOrigins("http://localhost:8000",
                                 "https://localhost:7043"
                                 )
-
-
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowAnyOrigin();
+            .AllowAnyOrigin();    
         });
 });
 
@@ -84,6 +82,8 @@ builder.Services.Configure<IdentityOptions>(options => {
                                                             // Xác thực số điện thoại
 
 });
+
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -97,6 +97,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseCors();
+
+app.UseAuthentication();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
