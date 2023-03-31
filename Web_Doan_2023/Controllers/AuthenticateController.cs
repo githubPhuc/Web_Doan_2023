@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Text;
 using Web_Doan_2023.Data;
@@ -386,10 +387,10 @@ namespace Web_Doan_2023.Controllers
         [HttpPost]
         [Route("TaoMaXacThuc")]
 
-        public async Task<IActionResult> TaoMaXacThuc(string mail, string Subject, string body, string from, string mailto)
+        public async Task<IActionResult> TaoMaXacThuc(   string mailto)
         {
-            var email = await _context.Users.Where(t => t.Email == mail).ToListAsync();
-            if (email.Count > 0)
+            var email = await _context.Users.Where(t => t.Email == mailto).ToListAsync();
+            if (email.Count > 0)//test
             {
                 string UpperCase = "QWERTYUIOPASDFGHJKLZXCVBNM";
                 string LowerCase = "qwertyuiopasdfghjklzxcvbnm";
@@ -411,21 +412,44 @@ namespace Web_Doan_2023.Controllers
                         password += allCharacters.ToCharArray()[(int)Math.Floor(rand * allCharacters.Length)];
                     }
                 }
-                
-                if (setting_Email.SendMail(Subject, body, from, mailto))
+
+
+                string content = "Đây là mã xác thực tài khoản 2P Shop của bạn ! <br>";
+                string token = content + "<h1>" + password + "</h1>";
+                string _from = "0306191061@caothang.edu.vn";
+                string _subject = "Xác thực tài khoản 2PShop";
+                string _body = token;
+                string _gmail = "0306191061@caothang.edu.vn";
+                string _password = "285728207";
+                MailMessage message = new MailMessage(_from, mailto, _subject, _body);
+                message.BodyEncoding = System.Text.Encoding.UTF8;
+                message.SubjectEncoding = System.Text.Encoding.UTF8;
+                message.IsBodyHtml = true;
+                message.ReplyToList.Add(new MailAddress(_from));
+                message.Sender = new MailAddress(_from);
+
+                using var smtpClient = new SmtpClient("smtp.gmail.com");
+                smtpClient.Port = 587;
+                smtpClient.EnableSsl = true;
+                smtpClient.Credentials = new NetworkCredential(_gmail, _password);
+
+                try
                 {
+                    await smtpClient.SendMailAsync(message);
                     return Ok(new
                     {
                         status = 200,
-                        msg = "Gửi mail thành công vui lòng kiểm tra hộp thư!!"
+                        msg = "Mã xác thực đã gửi đến mail ",
+                        otp = password
                     });
                 }
-                else
+                catch (Exception e)
                 {
+                    Console.WriteLine(e.Message);
                     return Ok(new
                     {
                         status = 500,
-                        msg = "Gửi mail thất bại. Vui lòng kiểm tra lại!!"
+                        msg = "Gửi thất bại, kiểm tra lại địa chỉ email"
                     });
                 }
 

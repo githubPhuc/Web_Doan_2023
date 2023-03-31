@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Web_Doan_2023.Data;
-using Web_Doan_2023.Models.User_Log;
+using Web_Doan_2023.Models;
 
 namespace Web_Doan_2023.Controllers
 {

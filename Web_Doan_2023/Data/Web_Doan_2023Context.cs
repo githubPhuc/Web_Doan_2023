@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Web_Doan_2023.Models;
-using Web_Doan_2023.Models.User_Log;
 
 namespace Web_Doan_2023.Data
 {
@@ -16,7 +15,7 @@ namespace Web_Doan_2023.Data
         {
         }
 
-        public DbSet<Web_Doan_2023.Models.User_Log.Menu> Menu { get; set; }
-        public DbSet<Web_Doan_2023.Models.User_Log.EditAccountModel> EditaccountModel { get; set; }
+        public DbSet<Menu> Menu { get; set; }
+        public DbSet<EditAccountModel> EditaccountModel { get; set; }
     }
 }

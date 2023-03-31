@@ -1,4 +1,4 @@
-﻿namespace Web_Doan_2023.Models.Address
+﻿namespace Web_Doan_2023.Models
 {
     public class Wards
     {

@@ -1,4 +1,4 @@
-﻿namespace Web_Doan_2023.Models.User_Log
+﻿namespace Web_Doan_2023.Models
 {
     public class Menu
     {
@@ -9,7 +9,7 @@
         public int oder_no { get; set; }
         public int Icon { get; set; }
         public string IdUsercreate { get; set; }
-        public string IdUserupdate { get; set;}
+        public string IdUserupdate { get; set; }
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
         public List<Page> Pages { get; set; }
