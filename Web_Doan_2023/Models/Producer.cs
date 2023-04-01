@@ -5,6 +5,7 @@ namespace Web_Doan_2023.Models
     public class Producer// nhà sản xuất
     {
         public int Id { get; set; }
+        public string codeProduce { get; set; }
         public string nameProduce { get; set; }
         public string Phone { get; set; }
         public string Email { get; set; }
@@ -13,6 +14,8 @@ namespace Web_Doan_2023.Models
         public int idDistrict { get; set; }
         public string Location { get; set; }
         public bool Status { get; set; }
+        public List<Product> Products { get; set; }
+
 
 
     }

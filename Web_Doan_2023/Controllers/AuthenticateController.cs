@@ -11,7 +11,6 @@ using System.Security.Claims;
 using System.Text;
 using Web_Doan_2023.Data;
 using Web_Doan_2023.Models;
-using Web_Doan_2023.Models.User_Log;
 using Web_Doan_2023.Settings;
 
 namespace Web_Doan_2023.Controllers
@@ -229,6 +228,8 @@ namespace Web_Doan_2023.Controllers
         [Route("login")]
         public async Task<IActionResult> Login([FromBody] Login_model model)
         {
+                    
+            string key_access = "info_access";
 
             var user = await userManager.FindByNameAsync(model.Username);
 
@@ -269,6 +270,7 @@ namespace Web_Doan_2023.Controllers
 
                     signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
                     );
+                HttpContext.Session.SetString("userName",user.UserName);
 
                 return Ok(new
                 {
@@ -316,7 +318,6 @@ namespace Web_Doan_2023.Controllers
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Username,
-                IdUser = model.Username,
                 PhoneNumber = model.Phone,
                 City = model.Cyti,
                 District =model.District,
@@ -355,7 +356,7 @@ namespace Web_Doan_2023.Controllers
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Username,
-                IdUser = model.Username,
+               
                 PhoneNumber = model.Phone,
                 City = model.Cyti,
                 District = model.District,
@@ -414,7 +415,7 @@ namespace Web_Doan_2023.Controllers
                 }
 
 
-                string content = "Đây là mã xác thực tài khoản 2P Shop của bạn ! <br>";
+                string content = "Đây là mã xác thực tài khoản <font color='blue'> Shop </font> của bạn <br>";
                 string token = content + "<h1>" + password + "</h1>";
                 string _from = "0306191061@caothang.edu.vn";
                 string _subject = "Xác thực tài khoản 2PShop";

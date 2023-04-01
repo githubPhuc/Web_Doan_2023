@@ -58,6 +58,14 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
     };
 });
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    // Set a short timeout for easy testing.
+    options.IdleTimeout = TimeSpan.FromSeconds(10);
+    options.Cookie.HttpOnly = true;
+});
+builder.Services.AddAuthentication().AddCookie();
 builder.Services.Configure<IdentityOptions>(options => {
     // Thiết lập về Password
     options.Password.RequireDigit = false; // Không bắt phải có số
@@ -106,7 +114,7 @@ app.UseAuthentication();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
-
+app.UseSession();
 app.MapControllers();
 
 app.Run();

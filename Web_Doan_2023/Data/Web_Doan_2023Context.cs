@@ -17,5 +17,8 @@ namespace Web_Doan_2023.Data
 
         public DbSet<Menu> Menu { get; set; }
         public DbSet<EditAccountModel> EditaccountModel { get; set; }
+        public DbSet<Web_Doan_2023.Models.Page>? Page { get; set; }
+        public DbSet<Web_Doan_2023.Models.Depot>? Depot { get; set; }
+        public DbSet<Web_Doan_2023.Models.User_Page>? User_Page { get; set; }
     }
 }
