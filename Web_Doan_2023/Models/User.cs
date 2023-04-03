@@ -9,7 +9,6 @@ namespace Web_Doan_2023.Models
         public int ? City { get; set; }//thanh pho
         public int? Wards { get; set; }//phuong xa
         public int? District { get; set; }
-
         public string? ShippingAddress { get; set; }
         public int idDepartment { get; set; }
         public bool? IsLocked { get; set; }

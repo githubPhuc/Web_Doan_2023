@@ -10,6 +10,7 @@
         public string idProducer { get; set; }// nhà sản xuất
         public decimal price { get; set; }
         public bool Status { get; set; }
+        public bool IsDelete { get; set; }
 
     }
 }

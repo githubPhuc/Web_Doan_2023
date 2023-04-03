@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Web_Doan_2023.Data;
 
@@ -11,9 +12,10 @@ using Web_Doan_2023.Data;
 namespace Web_Doan_2023.Migrations
 {
     [DbContext(typeof(Web_Doan_2023Context))]
-    partial class Web_Doan_2023ContextModelSnapshot : ModelSnapshot
+    [Migration("20230403144756_ms112")]
+    partial class ms112
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -476,15 +478,22 @@ namespace Web_Doan_2023.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("IdUsercreate")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("IdUserupdate")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("MenuId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("Updated")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MenuId");
 
                     b.ToTable("Page");
                 });
@@ -735,7 +744,12 @@ namespace Web_Doan_2023.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("User_PageId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("User_PageId");
 
                     b.ToTable("User_Page");
                 });
@@ -834,6 +848,13 @@ namespace Web_Doan_2023.Migrations
                         .HasForeignKey("CityId");
                 });
 
+            modelBuilder.Entity("Web_Doan_2023.Models.Page", b =>
+                {
+                    b.HasOne("Web_Doan_2023.Models.Menu", null)
+                        .WithMany("Pages")
+                        .HasForeignKey("MenuId");
+                });
+
             modelBuilder.Entity("Web_Doan_2023.Models.Product", b =>
                 {
                     b.HasOne("Web_Doan_2023.Models.CategoryProduct", null)
@@ -850,6 +871,13 @@ namespace Web_Doan_2023.Migrations
                     b.HasOne("Web_Doan_2023.Models.Department", null)
                         .WithMany("Users")
                         .HasForeignKey("DepartmentId");
+                });
+
+            modelBuilder.Entity("Web_Doan_2023.Models.User_Page", b =>
+                {
+                    b.HasOne("Web_Doan_2023.Models.User_Page", null)
+                        .WithMany("Pages")
+                        .HasForeignKey("User_PageId");
                 });
 
             modelBuilder.Entity("Web_Doan_2023.Models.Wards", b =>
@@ -885,9 +913,19 @@ namespace Web_Doan_2023.Migrations
                     b.Navigation("_Wards");
                 });
 
+            modelBuilder.Entity("Web_Doan_2023.Models.Menu", b =>
+                {
+                    b.Navigation("Pages");
+                });
+
             modelBuilder.Entity("Web_Doan_2023.Models.Producer", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("Web_Doan_2023.Models.User_Page", b =>
+                {
+                    b.Navigation("Pages");
                 });
 #pragma warning restore 612, 618
         }

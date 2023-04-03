@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Web_Doan_2023.Data;
 
@@ -11,9 +12,10 @@ using Web_Doan_2023.Data;
 namespace Web_Doan_2023.Migrations
 {
     [DbContext(typeof(Web_Doan_2023Context))]
-    partial class Web_Doan_2023ContextModelSnapshot : ModelSnapshot
+    [Migration("20230403155914_ms13")]
+    partial class ms13
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -476,9 +478,11 @@ namespace Web_Doan_2023.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("IdUsercreate")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("IdUserupdate")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Updated")
@@ -735,7 +739,12 @@ namespace Web_Doan_2023.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("User_PageId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("User_PageId");
 
                     b.ToTable("User_Page");
                 });
@@ -852,6 +861,13 @@ namespace Web_Doan_2023.Migrations
                         .HasForeignKey("DepartmentId");
                 });
 
+            modelBuilder.Entity("Web_Doan_2023.Models.User_Page", b =>
+                {
+                    b.HasOne("Web_Doan_2023.Models.User_Page", null)
+                        .WithMany("Pages")
+                        .HasForeignKey("User_PageId");
+                });
+
             modelBuilder.Entity("Web_Doan_2023.Models.Wards", b =>
                 {
                     b.HasOne("Web_Doan_2023.Models.City", null)
@@ -888,6 +904,11 @@ namespace Web_Doan_2023.Migrations
             modelBuilder.Entity("Web_Doan_2023.Models.Producer", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("Web_Doan_2023.Models.User_Page", b =>
+                {
+                    b.Navigation("Pages");
                 });
 #pragma warning restore 612, 618
         }

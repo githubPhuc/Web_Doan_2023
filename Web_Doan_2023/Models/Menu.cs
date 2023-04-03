@@ -12,6 +12,5 @@
         public string IdUserupdate { get; set; }
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
-        public List<Page> Pages { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Web_Doan_2023.Models
 {
-    public class saleProduct
+    public class Sale
     {
         public int Id { get; set; }
         public string nameSale { get; set;  }

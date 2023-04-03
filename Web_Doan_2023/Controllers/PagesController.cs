@@ -59,7 +59,8 @@ namespace Web_Doan_2023.Controllers
             {
                 return BadRequest();
             }
-
+            page.Updated = DateTime.Now;
+            page.IdUserupdate = HttpContext.Session.GetString("userName");
             _context.Entry(page).State = EntityState.Modified;
 
             try
@@ -84,16 +85,23 @@ namespace Web_Doan_2023.Controllers
         // POST: api/Pages
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Page>> PostPage(Page page)
+        public async Task<ActionResult> PostPage([FromForm] Page page)
         {
           if (_context.Page == null)
           {
               return Problem("Entity set 'Web_Doan_2023Context.Page'  is null.");
           }
-            _context.Page.Add(page);
+            var data = new Page();
+            data.Action = page.Action;
+            data.Code=page.Code;
+            data.Controller=page.Controller;
+            data.Created = DateTime.Now;
+            data.IdUsercreate= page.IdUsercreate;
+            data.Updated = DateTime.Now;
+            data.IdUserupdate= page.IdUserupdate;
+            _context.Page.Add(data);
             await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetPage", new { id = page.Id }, page);
+            return Ok(new Response { Status = "Success", Message = "Page created successfully!" });
         }
 
         // DELETE: api/Pages/5

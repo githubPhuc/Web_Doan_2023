@@ -32,6 +32,17 @@ namespace Web_Doan_2023.Controllers
           }
             return await _context.User_Page.ToListAsync();
         }
+        [HttpGet]
+        [Route("searchUserPage")]
+        public async Task<ActionResult> searchUserPage(string userid)
+        {
+            var data = _context.User_Page.Where(a => a.UserId == userid).ToArray();
+            return Ok(new
+            {
+                pro = data,
+                count = data.Count()
+            });
+        }
 
         // GET: api/User_Page/5
         [HttpGet("{id}")]
@@ -60,11 +71,13 @@ namespace Web_Doan_2023.Controllers
             {
                 return BadRequest();
             }
-
+            user_Page.IdUserupdate= HttpContext.Session.GetString("userName");
+            user_Page.Updated=DateTime.Now;
             _context.Entry(user_Page).State = EntityState.Modified;
 
             try
             {
+
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
@@ -85,13 +98,18 @@ namespace Web_Doan_2023.Controllers
         // POST: api/User_Page
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User_Page>> PostUser_Page([FromForm]User_Page user_Page)
+        public async Task<ActionResult<User_Page>> PostUser_Page(User_Page user_Page)
         {
-          if (_context.User_Page == null)
-          {
-              return Problem("Entity set 'Web_Doan_2023Context.User_Page'  is null.");
-          }
-          var check1= _context.Users.Where(a=>a.AccoutType =="Admin").ToList();
+              if (_context.User_Page == null)
+              {
+                  return Problem("Entity set 'Web_Doan_2023Context.User_Page'  is null.");
+              }
+              var check2 = _context.Page.Where(a=>a.Id == user_Page.PageId).ToList();
+            if (check2.Count() < 1)
+            {
+                return Ok(new Response { Status = "Failed", Message = "Page null!" });
+            }
+            var check1= _context.Users.Where(a=>a.AccoutType =="Admin").ToList();
             if(check1.Count()>0)
             {
                 _context.User_Page.Add(user_Page);
@@ -107,7 +125,7 @@ namespace Web_Doan_2023.Controllers
             }
             else
             {
-                return Ok(new Response { Status = "Failed", Message = "User created successfully!" });
+                return Ok(new Response { Status = "Failed", Message = "User not admin!" });
             }
            
         }

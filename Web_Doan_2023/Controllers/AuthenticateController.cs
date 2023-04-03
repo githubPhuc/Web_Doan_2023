@@ -271,7 +271,7 @@ namespace Web_Doan_2023.Controllers
                     signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
                     );
                 HttpContext.Session.SetString("userName",user.UserName);
-
+                string ss= HttpContext.Session.GetString("userName");
                 return Ok(new
                 {
                     token = new JwtSecurityTokenHandler().WriteToken(token),
