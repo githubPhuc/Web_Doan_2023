@@ -108,20 +108,25 @@ namespace Web_Doan_2023.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePage(int id)
         {
+            var datacheck = _context.Menu.Where(a=>a.PageId == id).ToList();
+            if(datacheck.Count()>0)
+            {
+                return Ok(new Response { Status = "Failed", Message = "Menu is exist!" });
+            }
             if (_context.Page == null)
             {
-                return NotFound();
+                return Ok(new Response { Status = "Failed", Message = "Page is exist!" });
             }
             var page = await _context.Page.FindAsync(id);
             if (page == null)
             {
-                return NotFound();
+                return Ok(new Response { Status = "Failed", Message = "Page is not exist!" });
             }
 
             _context.Page.Remove(page);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(new Response { Status = "Success", Message = "Delete page successfully!" });
         }
 
         private bool PageExists(int id)

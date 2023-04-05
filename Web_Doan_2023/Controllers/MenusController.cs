@@ -86,10 +86,15 @@ namespace Web_Doan_2023.Controllers
         [HttpPost]
         public async Task<ActionResult<Menu>> PostMenu(Menu menu)
         {
-          if (_context.Menu == null)
-          {
-              return Problem("Entity set 'Web_Doan_2023Context.Menu'  is null.");
-          }
+            var dataCheck = _context.Menu.Where(a=>a.Menu_Name== menu.Menu_Name).ToList();  
+            if(dataCheck.Count()>0)
+            {
+                return Ok(new Response { Status = "Failed", Message = "Menu name exist!" });
+            }    
+              if (_context.Menu == null)
+              {
+                  return Ok(new Response { Status = "Failed", Message = "Menu name exist!" });
+            }
             _context.Menu.Add(menu);
             await _context.SaveChangesAsync();
 
