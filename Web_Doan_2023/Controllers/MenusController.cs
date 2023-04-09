@@ -93,18 +93,19 @@ namespace Web_Doan_2023.Controllers
             }    
               if (_context.Menu == null)
               {
-                  return Ok(new Response { Status = "Failed", Message = "Menu name exist!" });
+                  return Ok(new Response { Status = "Failed", Message = "Menu exist!" });
             }
             _context.Menu.Add(menu);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetMenu", new { id = menu.Id }, menu);
+            return Ok(new Response { Status = "Success", Message = "Menu created successfully!" });
         }
 
         // DELETE: api/Menus/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMenu(int id)
         {
+           
             if (_context.Menu == null)
             {
                 return NotFound();
