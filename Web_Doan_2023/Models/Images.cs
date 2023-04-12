@@ -3,7 +3,7 @@
     public class Images
     {
         public int Id { get; set; }
-        public string nameImages { get; set; }
+        public string? nameImages { get; set; }
         public bool Status { get; set; }
     }
 }
