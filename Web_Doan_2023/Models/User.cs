@@ -5,6 +5,7 @@ namespace Web_Doan_2023.Models
     public class User: IdentityUser
     {
         public string? Fullname { get; set; }
+        public string? images { get; set; }
         public string? AccoutType { get; set; }
         public int ? City { get; set; }//thanh pho
         public int? Wards { get; set; }//phuong xa

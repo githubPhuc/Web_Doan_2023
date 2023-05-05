@@ -8,7 +8,7 @@
         public string? Description { get; set; } // sự miêu tả
         public int? idCategory { get; set; }
         public string? nameCategory { get; set; }
-        public string? idProducer { get; set; }// nhà sản xuất
+        public int idProducer { get; set; }// nhà sản xuất
         public decimal? price { get; set; }
         public string? RamProduct { get; set; }
         public string? SSDProduct { get; set; }
@@ -17,7 +17,11 @@
         public string? DisplayProduct { get; set; }
         public string? ColorProduct { get; set; }
         public string? AccessoriesIncluded { get; set; }
+        public string? imageOne { get; set; }
+        public string? imageTwo { get; set; }
+        public string? imageThree { get; set; }
         public bool? Status { get; set; }
+        public int idSale { get; set; }
         public bool? IsDelete { get; set; }
 
     }

@@ -59,8 +59,17 @@ namespace Web_Doan_2023.Controllers
             {
                 return BadRequest();
             }
+            var dataDepots = new Depot();
 
-            _context.Entry(depot).State = EntityState.Modified;
+
+               dataDepots.codeDepot = depot.codeDepot.ToUpper();
+                dataDepots.nameDepot = depot.nameDepot;
+                dataDepots.Phone = depot.Phone;
+                dataDepots.Location = depot.Location;
+                dataDepots.status = depot.status;
+                dataDepots.storekeepers = depot.storekeepers;
+            
+            _context.Entry(dataDepots).State = EntityState.Modified;
 
             try
             {
@@ -70,7 +79,7 @@ namespace Web_Doan_2023.Controllers
             {
                 if (!DepotExists(id))
                 {
-                    return NotFound();
+                    return Ok(new Response { Status = "Failed", Message = "Update Depots failed!" });
                 }
                 else
                 {
@@ -78,7 +87,11 @@ namespace Web_Doan_2023.Controllers
                 }
             }
 
-            return NoContent();
+            return Ok(new
+            {
+                status = 200,
+                id = dataDepots.Id,
+            });
         }
 
         // POST: api/Depots
@@ -86,14 +99,33 @@ namespace Web_Doan_2023.Controllers
         [HttpPost]
         public async Task<ActionResult<Depot>> PostDepot(Depot depot)
         {
-          if (_context.Depot == null)
-          {
-              return Problem("Entity set 'Web_Doan_2023Context.Depot'  is null.");
-          }
-            _context.Depot.Add(depot);
+            if (_context.Depot == null)
+            {
+                return Problem("Entity set 'Web_Doan_2023Context.Depot'  is null.");
+            }
+            string code = depot.codeDepot.ToUpper();
+            if (code.Length != 3)
+            {
+                return Ok(new Response { Status = "Failed", Message = "Code depots in three characters long" });
+
+            }
+            var dataDepots = new Depot()
+            {                
+                codeDepot = depot.codeDepot.ToUpper(),
+                nameDepot = depot.nameDepot,
+                Phone = depot.Phone,
+                Location = depot.Location,
+                status = true,
+                storekeepers = depot.storekeepers,
+            };
+            _context.Depot.Add(dataDepots);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetDepot", new { id = depot.Id }, depot);
+            return Ok(new
+            {
+                status = 200,
+                id = dataDepots.Id,
+            });
         }
 
         // DELETE: api/Depots/5
