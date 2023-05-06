@@ -84,7 +84,7 @@ namespace Web_Doan_2023.Controllers
         // POST: api/CategoryProducts
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<CategoryProduct>> PostCategoryProduct(CategoryProduct categoryProduct)
+        public async Task<ActionResult<CategoryProduct>> PostCategoryProduct([FromBody] CategoryProduct categoryProduct)
         {
           if (_context.CategoryProduct == null)
           {
@@ -109,7 +109,8 @@ namespace Web_Doan_2023.Controllers
             {
                 return NotFound();
             }
-
+            var dataProduct = _context.Product.Where(a => a.idCategory == id).ToList();
+            if(dataProduct.Count > 0) { return Ok(new Response { Status = "Failed", Message = "The product exists in the database!Unable to delete category product" }); }
             _context.CategoryProduct.Remove(categoryProduct);
             await _context.SaveChangesAsync();
 

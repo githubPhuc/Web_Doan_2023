@@ -34,5 +34,6 @@ namespace Web_Doan_2023.Data
         public DbSet<Web_Doan_2023.Models.CartDetailProduct>? CartDetailProduct { get; set; }
         public DbSet<Web_Doan_2023.Models.productDepot>? productDepot { get; set; }
         public DbSet<Web_Doan_2023.Models.ImportBillDepot>? ImportBillDepot { get; set; }
+        public DbSet<Web_Doan_2023.Models.Images>? Images { get; set; }
     }
 }

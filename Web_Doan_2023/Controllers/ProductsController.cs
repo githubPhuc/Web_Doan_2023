@@ -145,26 +145,7 @@ namespace Web_Doan_2023.Controllers
                     idSale = product.idSale,
                 };
                 _context.Product.Add(pro);
-                foreach (var file in uploadFile)
-                {
-                    string fileName = pro.codeProduct;
-                    string filePath = GetFilePath(fileName);
-                    if (!System.IO.Directory.Exists(filePath))
-                    {
-                        System.IO.Directory.CreateDirectory(filePath);
-                    }
-                    string imagePath = filePath + "\\image" + pro.Id + ".png";
-                    if (System.IO.File.Exists(imagePath))
-                    {
-                        System.IO.File.Delete(imagePath);
-                    }
-                    using (FileStream stream = System.IO.File.Create(imagePath))
-                    {
-                        await file.CopyToAsync(stream);
-
-                    }
-                }
-
+              
 
                 
                 await _context.SaveChangesAsync();
@@ -191,6 +172,7 @@ namespace Web_Doan_2023.Controllers
 
                 }
                 // var uploadFile = Request.Form.Files;
+                var dataImage = new Images();
                 foreach (var file in uploadFile)
                 {
                     string fileName = dataProduct.codeProduct;
@@ -204,6 +186,7 @@ namespace Web_Doan_2023.Controllers
                     {
                         System.IO.File.Delete(imagePath);
                     }
+                    dataImage.nameImage = imagePath;
                     using (FileStream stream = System.IO.File.Create(imagePath))
                     {
                         await file.CopyToAsync(stream);

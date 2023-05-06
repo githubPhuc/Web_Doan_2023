@@ -84,7 +84,7 @@ namespace Web_Doan_2023.Controllers
         // POST: api/ImportBillDepots
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<ImportBillDepot>> PostImportBillDepot(ImportBillDepot importBillDepot)
+        public async Task<ActionResult> PostImportBillDepot(ImportBillDepot importBillDepot)
         {
               if (_context.ImportBillDepot == null)
               {
