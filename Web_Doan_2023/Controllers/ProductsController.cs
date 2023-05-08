@@ -50,7 +50,8 @@ namespace Web_Doan_2023.Controllers
         }
 
         // GET: api/Products/5
-        [HttpGet("{id}")]
+        [HttpGet]
+        [Route("GetProductById")]
         public async Task<ActionResult<Product>> GetProductById(int id)
         {
           if (_context.Product == null)
@@ -58,7 +59,8 @@ namespace Web_Doan_2023.Controllers
                 return Ok(new Response { Status = "Failed", Message = "Not Data!" });
             }
             var data = (from a in _context.Product
-                       where a.Id == id && a.IsDelete == false
+                       where a.Id == id 
+                       where a.IsDelete == false
                        select new
                        {
                            Id = a.Id,
@@ -88,7 +90,8 @@ namespace Web_Doan_2023.Controllers
                 count = data.Count()
             });
         }
-        [HttpGet("{id}")]
+        [HttpGet]
+        [Route("GetProductOnCategory")]
         public async Task<ActionResult<Product>> GetProductOnCategory(int id)
         {
             if (_context.Product == null)
@@ -211,7 +214,7 @@ namespace Web_Doan_2023.Controllers
             try
             {
                 var dataProduct = _context.Product.FirstOrDefault(a => a.Id == id);
-                if(dataProduct==null)
+                if (dataProduct == null)
                 {
                     return Ok(new Response { Status = "Failed", Message = "Product is null!" });
                 }//Kiễm tra sự tồn tại của sản phẩm 
@@ -219,17 +222,17 @@ namespace Web_Doan_2023.Controllers
                 {
                     var dataImage = new Images();//khởi tạo data image
                     string fileName = dataProduct.codeProduct; // lấy code product
-                    if(fileName.Length!=9)
+                    if (fileName.Length != 9)
                     {
                         results = false;
-                        return Ok(results); 
+                        return Ok(results);
                     }
                     string filePath = GetFilePath(fileName);
                     if (!System.IO.Directory.Exists(filePath))
                     {
                         System.IO.Directory.CreateDirectory(filePath);
                     }
-                    string imagePath = filePath + "\\image"+id+".png";
+                    string imagePath = filePath + "\\image" + id + ".png";
                     if (System.IO.File.Exists(imagePath))
                     {
                         System.IO.File.Delete(imagePath);
@@ -240,7 +243,7 @@ namespace Web_Doan_2023.Controllers
                         await file.CopyToAsync(stream);
                         results = true;
                     }
-                    dataImage.idProduct= id;
+                    dataImage.idProduct = id;
                     dataImage.nameImage = imagePath;
                     _context.Images.Add(dataImage);
                     await _context.SaveChangesAsync();
@@ -254,7 +257,7 @@ namespace Web_Doan_2023.Controllers
         }
         [HttpPost]
         [Route("updateImage")]
-        public async Task<ActionResult> updateImage(int idImage,int idProduct, IFormFile updateFile)
+        public async Task<ActionResult> updateImage(int idImage, int idProduct, IFormFile updateFile)
         {
             bool results = false;
             try
@@ -264,7 +267,7 @@ namespace Web_Doan_2023.Controllers
                 {
                     return Ok(new Response { Status = "Failed", Message = "Product is null!" });
                 }//Kiễm tra sự tồn tại của sản phẩm .
-                var dataImageValues= _context.Images.FirstOrDefault(a => a.idProduct == idProduct && a.Id == idImage);
+                var dataImageValues = _context.Images.FirstOrDefault(a => a.idProduct == idProduct && a.Id == idImage);
                 if (dataImageValues == null)
                 {
                     return Ok(new Response { Status = "Failed", Message = "Image in Product is not null!" });

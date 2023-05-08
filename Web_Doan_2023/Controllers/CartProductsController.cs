@@ -23,7 +23,7 @@ namespace Web_Doan_2023.Controllers
 
         // GET: api/CartProducts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CartProduct>>> GetCartProduct(string UserID)
+        public async Task<IActionResult> GetCartProduct(string UserID)
         {
             if (_context.CartProduct == null)
             {
@@ -38,12 +38,12 @@ namespace Web_Doan_2023.Controllers
                               nameProduct = b.nameProduct,
                               ProductId = a.ProductId,
                               Quantity = a.Quantity,
-                              price = (a.salePrice == 0?b.price:(b.price - a.salePrice))*a.Quantity,
+                              price = (a.salePrice == 0 ? b.price : (b.price - a.salePrice)) * a.Quantity,
                               salePrice = a.salePrice,
-                              image = _context.Images.Where(d=>d.idProduct==a.Id).Select(d=>d.nameImage).ToList().Take(1),
-                              
-                              SoLuongCart = (from  a in _context.CartProduct 
-                                             where  a.userID == UserID
+                              image = _context.Images.Where(d => d.idProduct == a.Id).Select(d => d.nameImage).ToList().Take(1),
+
+                              SoLuongCart = (from a in _context.CartProduct
+                                             where a.userID == UserID
                                              select a).Count()
                           }).ToList();
 
@@ -94,6 +94,7 @@ namespace Web_Doan_2023.Controllers
         // POST: api/CartProducts
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Route("addCart")]
         public async Task<ActionResult<CartProduct>> addCart(int idProduct, int Quantity, string userID, decimal sale)
         {
             var check = await _context.CartProduct.Where(c => c.ProductId == idProduct && c.userID == userID).FirstOrDefaultAsync();
@@ -137,11 +138,12 @@ namespace Web_Doan_2023.Controllers
             });
         }
 
-        // DELETE: api/CartProducts/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCartProduct(int id)
+        //DELETE: api/CartProducts/5
+        [HttpPost]
+        [Route("DeleteCart")]
+        public async Task<IActionResult> DeleteCart(int id)
         {
-            var cart = await _context.CartProduct.FindAsync(id);
+            var cart = _context.CartProduct.FirstOrDefault(a => a.Id == id);
             if (cart != null)
             {
                 _context.CartProduct.Remove(cart);
@@ -152,7 +154,35 @@ namespace Web_Doan_2023.Controllers
                     msg = "Đã xoá khỏi giỏ hàng"
                 });
             }
-            return BadRequest();
+            return Ok(new
+            {
+                status = 500,
+                msg = "Delete cart fail!!"
+            });
+        }
+        [HttpPost]
+        [Route("RemoveAllCart")]
+        public async Task<IActionResult> RemoveAllCart(string userID)
+        {
+            var cart = await _context.CartProduct.Where(c => c.userID == userID).ToListAsync();
+            if (cart != null)
+            {
+                foreach (var c in cart)
+                {
+                    _context.Remove(c);
+                }
+                await _context.SaveChangesAsync();
+                return Ok(new
+                {
+                    status = 200,
+                    msg = "Đã xoá toàn bộ giỏ hàng "
+                });
+            }
+            return Ok(new
+            {
+                status = 500,
+                msg = "Delete cart fail!!"
+            });
         }
 
         private bool CartProductExists(int id)

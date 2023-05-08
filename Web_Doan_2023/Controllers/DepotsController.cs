@@ -53,15 +53,13 @@ namespace Web_Doan_2023.Controllers
         // PUT: api/Depots/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutDepot(int id, Depot depot)
+        public async Task<IActionResult> PutDepot(int id, Depot depot)// Lỗi rồi
         {
             if (id != depot.Id)
             {
                 return BadRequest();
             }
             var dataDepots = new Depot();
-
-
                dataDepots.codeDepot = depot.codeDepot.ToUpper();
                 dataDepots.nameDepot = depot.nameDepot;
                 dataDepots.Phone = depot.Phone;

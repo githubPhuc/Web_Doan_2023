@@ -98,6 +98,7 @@ namespace Web_Doan_2023.Controllers
 
         // DELETE: api/Producers/5
         [HttpPost]
+        [Route("DeleteProducer")]
         public async Task<IActionResult> DeleteProducer(int id)
         {
             if (_context.Producer == null)
@@ -115,24 +116,7 @@ namespace Web_Doan_2023.Controllers
             });
 
         }
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteProducer(int id)
-        //{
-        //    if (_context.Producer == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    var producer = await _context.Producer.FindAsync(id);
-        //    if (producer == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    _context.Producer.Remove(producer);
-        //    await _context.SaveChangesAsync();
-
-        //    return NoContent();
-        //}
+       
 
         private bool ProducerExists(int id)
         {

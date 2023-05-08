@@ -111,6 +111,7 @@ namespace Web_Doan_2023.Controllers
 
         // DELETE: api/ImportBillDepots/5
         [HttpPost]
+        [Route("DeleteProducer")]
         public async Task<IActionResult> DeleteProducer(int id)
         {
             var dataImportBillDepots = _context.ImportBillDepot.FirstOrDefault(a => a.Id == id);
