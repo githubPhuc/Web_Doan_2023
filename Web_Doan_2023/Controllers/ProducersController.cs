@@ -97,24 +97,42 @@ namespace Web_Doan_2023.Controllers
         }
 
         // DELETE: api/Producers/5
-        [HttpDelete("{id}")]
+        [HttpPost]
         public async Task<IActionResult> DeleteProducer(int id)
         {
             if (_context.Producer == null)
             {
-                return NotFound();
+                return Ok(new Response { Status = "500", Message = "The Producer exists in the database!Unable to delete Producer!" });
             }
-            var producer = await _context.Producer.FindAsync(id);
-            if (producer == null)
-            {
-                return NotFound();
-            }
-
-            _context.Producer.Remove(producer);
+            var dataProduce = _context.Producer.FirstOrDefault(a=>a.Id==id);
+            dataProduce.Status = false;
+            _context.Entry(dataProduce).State = EntityState.Modified;
             await _context.SaveChangesAsync();
+            return Ok(new
+            {
+                status = 200,
+                msg = "Delete producer"+ dataProduce.nameProduce + " Success",
+            });
 
-            return NoContent();
         }
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteProducer(int id)
+        //{
+        //    if (_context.Producer == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    var producer = await _context.Producer.FindAsync(id);
+        //    if (producer == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    _context.Producer.Remove(producer);
+        //    await _context.SaveChangesAsync();
+
+        //    return NoContent();
+        //}
 
         private bool ProducerExists(int id)
         {

@@ -30,25 +30,24 @@ namespace Web_Doan_2023.Controllers
                 return NotFound();
             }
             var result = (from a in _context.CartProduct
-                          join c in _context.CartDetailProduct on a.Id equals c.IdCartProduct
-                          join b in _context.Product on c.ProductId equals b.Id
-                          
-                          where a.userCreate == UserID
+                          join b in _context.Product on a.ProductId equals b.Id
+                          where a.userID == UserID
                           select new
                           {
                               Id = a.Id,
-                              TenSanPham = b.nameProduct,
-                              IdSanPham = c.IdCartProduct,
-                              SoLuong = c.Quantity,
-                              GiaSanPham = b.price,
-                              //hình ảnh , giá cả , giảm giá
-                              SoLuongCart = (from c in _context.CartDetailProduct
-                                             join a in _context.CartProduct on a.Id equals c.IdCartProduct
-                                             where  a.userCreate == UserID
-                                             select c).Count()
+                              nameProduct = b.nameProduct,
+                              ProductId = a.ProductId,
+                              Quantity = a.Quantity,
+                              price = (a.salePrice == 0?b.price:(b.price - a.salePrice))*a.Quantity,
+                              salePrice = a.salePrice,
+                              image = _context.Images.Where(d=>d.idProduct==a.Id).Select(d=>d.nameImage).ToList().Take(1),
+                              
+                              SoLuongCart = (from  a in _context.CartProduct 
+                                             where  a.userID == UserID
+                                             select a).Count()
                           }).ToList();
 
-            var total = result.Sum(s => s.GiaSanPham);
+            var total = result.Sum(s => s.price);
             return Ok(new
             {
                 cart = result,
@@ -57,88 +56,103 @@ namespace Web_Doan_2023.Controllers
 
         }
 
-        // GET: api/CartProducts/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<CartProduct>> GetCartProduct(int id)
-        {
-          if (_context.CartProduct == null)
-          {
-              return NotFound();
-          }
-            var cartProduct = await _context.CartProduct.FindAsync(id);
-
-            if (cartProduct == null)
-            {
-                return NotFound();
-            }
-
-            return cartProduct;
-        }
-
         // PUT: api/CartProducts/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCartProduct(int id, CartProduct cartProduct)
+        public async Task<IActionResult> PutCartProduct(int cartID, int Quantity, decimal sale = 0)
         {
-            if (id != cartProduct.Id)
+            var cart = await _context.CartProduct.FindAsync(cartID);
+            var proid = cart.ProductId;
+            var pro = await _context.productDepot.FindAsync(proid);
+            cart.Quantity += Quantity;
+            cart.salePrice = (sale!=0?sale: cart.salePrice);
+            if (cart.Quantity == 0 || cart.Quantity > 5)
             {
                 return BadRequest();
             }
-
-            _context.Entry(cartProduct).State = EntityState.Modified;
-
-            try
+            if (cart.Quantity > pro.QuantityProduct)
             {
-                await _context.SaveChangesAsync();
+                return Ok(new
+                {
+                    Status = 500,
+                    msg = "Số lượng sản phẩm không đủ"
+                });
             }
-            catch (DbUpdateConcurrencyException)
+            if (cart.Quantity <= 0)
             {
-                if (!CartProductExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                cart.Quantity = 0;
             }
+            _context.Update(cart);
+            await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(new
+            {
+                status = 200
+            });
         }
 
         // POST: api/CartProducts
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<CartProduct>> PostCartProduct(CartProduct cartProduct)
+        public async Task<ActionResult<CartProduct>> addCart(int idProduct, int Quantity, string userID, decimal sale)
         {
-          if (_context.CartProduct == null)
-          {
-              return Problem("Entity set 'Web_Doan_2023Context.CartProduct'  is null.");
-          }
-            _context.CartProduct.Add(cartProduct);
-            await _context.SaveChangesAsync();
+            var check = await _context.CartProduct.Where(c => c.ProductId == idProduct && c.userID == userID).FirstOrDefaultAsync();
+            var pro = await _context.productDepot.FindAsync(idProduct);
 
-            return CreatedAtAction("GetCartProduct", new { id = cartProduct.Id }, cartProduct);
+            if (Quantity > pro.QuantityProduct)
+            {
+                return Ok(new
+                {
+                    status = 500,
+                    msg = "Số lượng sản phẩm không đủ"
+                });
+            }
+
+            if (check != null)
+            {
+                check.Quantity += Quantity;
+                _context.Update(check);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                var dataProduct = _context.Product.FirstOrDefault(b => b.Id == idProduct);
+                var cart = new CartProduct();
+                cart.userID = userID;
+                cart.ProductId = idProduct;
+                cart.Price = (decimal)dataProduct.price;
+                cart.Quantity = Quantity;
+                cart.salePrice = sale;
+                cart.ProductName = dataProduct.nameProduct;
+                cart.CreatedDate = DateTime.Now;
+                cart.Status = false;
+                _context.Add(cart);
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok(new
+            {
+                status = 200,
+                msg = "Đã thêm vào giỏ hàng"
+            });
         }
 
         // DELETE: api/CartProducts/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCartProduct(int id)
         {
-            if (_context.CartProduct == null)
+            var cart = await _context.CartProduct.FindAsync(id);
+            if (cart != null)
             {
-                return NotFound();
+                _context.CartProduct.Remove(cart);
+                await _context.SaveChangesAsync();
+                return Ok(new
+                {
+                    Status = 200,
+                    msg = "Đã xoá khỏi giỏ hàng"
+                });
             }
-            var cartProduct = await _context.CartProduct.FindAsync(id);
-            if (cartProduct == null)
-            {
-                return NotFound();
-            }
-
-            _context.CartProduct.Remove(cartProduct);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return BadRequest();
         }
 
         private bool CartProductExists(int id)

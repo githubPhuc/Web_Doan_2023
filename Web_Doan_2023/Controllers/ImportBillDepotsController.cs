@@ -110,24 +110,23 @@ namespace Web_Doan_2023.Controllers
         }
 
         // DELETE: api/ImportBillDepots/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteImportBillDepot(int id)
+        [HttpPost]
+        public async Task<IActionResult> DeleteProducer(int id)
         {
-            if (_context.ImportBillDepot == null)
+            var dataImportBillDepots = _context.ImportBillDepot.FirstOrDefault(a => a.Id == id);
+            if (dataImportBillDepots == null)
             {
-                return NotFound();
-            }
-            var importBillDepot = await _context.ImportBillDepot.FindAsync(id);
-            if (importBillDepot == null)
-            {
-                return NotFound();
-            }
-
-            _context.ImportBillDepot.Remove(importBillDepot);
+                return Ok(new Response { Status = "500", Message = "The Producer exists in the database!Unable to delete Producer!" });
+            }// kiểm tra 
+            dataImportBillDepots.Status = isStatus.Cancel;
+            _context.Entry(dataImportBillDepots).State = EntityState.Modified;
             await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
+            return Ok(new
+            {
+                status = 200,
+                msg = "Delete producer" + dataImportBillDepots.codeBill + " Success",
+            });
+        }// chưa kiểm tra
 
         private bool ImportBillDepotExists(int id)
         {
