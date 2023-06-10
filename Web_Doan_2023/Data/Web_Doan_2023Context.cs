@@ -17,9 +17,7 @@ namespace Web_Doan_2023.Data
 
         public DbSet<Menu> Menu { get; set; }
         public DbSet<EditAccountModel> EditaccountModel { get; set; }
-        public DbSet<Web_Doan_2023.Models.Page>? Page { get; set; }
         public DbSet<Web_Doan_2023.Models.Depot>? Depot { get; set; }
-        public DbSet<Web_Doan_2023.Models.User_Page>? User_Page { get; set; }
         public DbSet<Web_Doan_2023.Models.CategoryProduct>? CategoryProduct { get; set; }
         public DbSet<Web_Doan_2023.Models.Department>? Department { get; set; }
         public DbSet<Web_Doan_2023.Models.City>? City { get; set; }
@@ -35,5 +33,11 @@ namespace Web_Doan_2023.Data
         public DbSet<Web_Doan_2023.Models.ImportBillDepot>? ImportBillDepot { get; set; }
         public DbSet<Web_Doan_2023.Models.Images>? Images { get; set; }
         public DbSet<Web_Doan_2023.Models.BillOfSale>? BillOfSale { get; set; }
+        public DbSet<Web_Doan_2023.Models.User_Menu>? User_Menu { get; set; }
+        public DbSet<Web_Doan_2023.Models.RamProduct>? RamProduct { get; set; }
+        public DbSet<Web_Doan_2023.Models.CpuProduct>? CpuProduct { get; set; }
+        public DbSet<Web_Doan_2023.Models.ColorProduct>? ColorProduct { get; set; }
+        public DbSet<Web_Doan_2023.Models.DisplayProduct>? DisplayProduct { get; set; }
+        public DbSet<Web_Doan_2023.Models.SsdProduct>? SsdProduct { get; set; }
     }
 }

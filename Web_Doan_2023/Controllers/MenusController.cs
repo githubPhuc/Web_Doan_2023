@@ -32,26 +32,6 @@ namespace Web_Doan_2023.Controllers
             return await _context.Menu.ToListAsync();
         }
 
-        // GET: api/Menus/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Menu>> GetMenu(int id)
-        {
-          if (_context.Menu == null)
-          {
-              return NotFound();
-          }
-            var menu = await _context.Menu.FindAsync(id);
-
-            if (menu == null)
-            {
-                return NotFound();
-            }
-
-            return menu;
-        }
-
-        // PUT: api/Menus/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutMenu(int id, Menu menu)
         {
@@ -95,7 +75,8 @@ namespace Web_Doan_2023.Controllers
               {
                   return Ok(new Response { Status = "Failed", Message = "Menu exist!" });
             }
-            _context.Menu.Add(menu);
+
+            _context.Menu.Add(menu);        
             await _context.SaveChangesAsync();
 
             return Ok(new Response { Status = "Success", Message = "Menu created successfully!" });

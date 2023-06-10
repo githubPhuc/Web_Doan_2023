@@ -12,14 +12,14 @@ using Web_Doan_2023.Data;
 namespace Web_Doan_2023.Migrations
 {
     [DbContext(typeof(Web_Doan_2023Context))]
-    [Migration("20230505033556_ms18")]
-    partial class ms18
+    [Migration("20230601104703_msr2")]
+    partial class msr2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.15")
+                .HasAnnotation("ProductVersion", "6.0.16")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
@@ -157,7 +157,7 @@ namespace Web_Doan_2023.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Web_Doan_2023.Models.CartDetailProduct", b =>
+            modelBuilder.Entity("Web_Doan_2023.Models.BillOfSale", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -165,24 +165,45 @@ namespace Web_Doan_2023.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("IdCartProduct")
-                        .HasColumnType("int");
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("bit");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ProductName")
+                    b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
+                    b.Property<string>("StatusBill")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("StatusCode")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UsernameCreate")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UsernameDelete")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UsernameUpdate")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("code")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("createDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("deleteDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("updateDate")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.ToTable("CartDetailProduct");
+                    b.ToTable("BillOfSale");
                 });
 
             modelBuilder.Entity("Web_Doan_2023.Models.CartProduct", b =>
@@ -199,14 +220,26 @@ namespace Web_Doan_2023.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
                     b.Property<bool>("Status")
                         .HasColumnType("bit");
 
-                    b.Property<string>("StatusMessage")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("saleID")
+                        .HasColumnType("int");
 
-                    b.Property<string>("userCreate")
+                    b.Property<decimal?>("salePrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("userID")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -446,6 +479,68 @@ namespace Web_Doan_2023.Migrations
                     b.ToTable("exportWarehouseVouchers");
                 });
 
+            modelBuilder.Entity("Web_Doan_2023.Models.Images", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("idProduct")
+                        .HasColumnType("int");
+
+                    b.Property<string>("nameImage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("Images");
+                });
+
+            modelBuilder.Entity("Web_Doan_2023.Models.ImportBillDepot", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsAcceptance")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserCreate")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserUpdate")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("codeBill")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ImportBillDepot");
+                });
+
             modelBuilder.Entity("Web_Doan_2023.Models.Menu", b =>
                 {
                     b.Property<int>("Id")
@@ -457,8 +552,8 @@ namespace Web_Doan_2023.Migrations
                     b.Property<DateTime?>("Created")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("Icon")
-                        .HasColumnType("int");
+                    b.Property<string>("Icon")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("IdUsercreate")
                         .HasColumnType("nvarchar(max)");
@@ -468,9 +563,6 @@ namespace Web_Doan_2023.Migrations
 
                     b.Property<string>("Menu_Name")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("PageId")
-                        .HasColumnType("int");
 
                     b.Property<int?>("ParentId")
                         .HasColumnType("int");
@@ -484,40 +576,6 @@ namespace Web_Doan_2023.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Menu");
-                });
-
-            modelBuilder.Entity("Web_Doan_2023.Models.Page", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("Action")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Code")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Controller")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("IdUsercreate")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("IdUserupdate")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("Updated")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Page");
                 });
 
             modelBuilder.Entity("Web_Doan_2023.Models.Producer", b =>
@@ -574,6 +632,9 @@ namespace Web_Doan_2023.Migrations
                     b.Property<string>("CPUProduct")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("CartProductId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("CategoryProductId")
                         .HasColumnType("int");
 
@@ -607,7 +668,7 @@ namespace Web_Doan_2023.Migrations
                     b.Property<string>("codeProduct")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("idCategory")
+                    b.Property<int>("idCategory")
                         .HasColumnType("int");
 
                     b.Property<int>("idProducer")
@@ -615,15 +676,6 @@ namespace Web_Doan_2023.Migrations
 
                     b.Property<int>("idSale")
                         .HasColumnType("int");
-
-                    b.Property<string>("imageOne")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("imageThree")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("imageTwo")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("nameCategory")
                         .HasColumnType("nvarchar(max)");
@@ -638,6 +690,8 @@ namespace Web_Doan_2023.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CartProductId");
 
                     b.HasIndex("CategoryProductId");
 
@@ -656,7 +710,10 @@ namespace Web_Doan_2023.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("idDetop")
+                    b.Property<int>("QuantityProduct")
+                        .HasColumnType("int");
+
+                    b.Property<int>("idDepot")
                         .HasColumnType("int");
 
                     b.Property<int>("idProduct")
@@ -789,7 +846,7 @@ namespace Web_Doan_2023.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Web_Doan_2023.Models.User_Page", b =>
+            modelBuilder.Entity("Web_Doan_2023.Models.User_Menu", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -806,18 +863,19 @@ namespace Web_Doan_2023.Migrations
                     b.Property<string>("IdUserupdate")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("PageId")
+                    b.Property<int>("MenuId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("Updated")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("User_Page");
+                    b.ToTable("User_Menu");
                 });
 
             modelBuilder.Entity("Web_Doan_2023.Models.Wards", b =>
@@ -914,8 +972,19 @@ namespace Web_Doan_2023.Migrations
                         .HasForeignKey("CityId");
                 });
 
+            modelBuilder.Entity("Web_Doan_2023.Models.Images", b =>
+                {
+                    b.HasOne("Web_Doan_2023.Models.Product", null)
+                        .WithMany("images")
+                        .HasForeignKey("ProductId");
+                });
+
             modelBuilder.Entity("Web_Doan_2023.Models.Product", b =>
                 {
+                    b.HasOne("Web_Doan_2023.Models.CartProduct", null)
+                        .WithMany("Products")
+                        .HasForeignKey("CartProductId");
+
                     b.HasOne("Web_Doan_2023.Models.CategoryProduct", null)
                         .WithMany("Products")
                         .HasForeignKey("CategoryProductId");
@@ -947,6 +1016,11 @@ namespace Web_Doan_2023.Migrations
                         .HasForeignKey("DistrictId");
                 });
 
+            modelBuilder.Entity("Web_Doan_2023.Models.CartProduct", b =>
+                {
+                    b.Navigation("Products");
+                });
+
             modelBuilder.Entity("Web_Doan_2023.Models.CategoryProduct", b =>
                 {
                     b.Navigation("Products");
@@ -972,6 +1046,11 @@ namespace Web_Doan_2023.Migrations
             modelBuilder.Entity("Web_Doan_2023.Models.Producer", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("Web_Doan_2023.Models.Product", b =>
+                {
+                    b.Navigation("images");
                 });
 
             modelBuilder.Entity("Web_Doan_2023.Models.productDepot", b =>

@@ -5,9 +5,8 @@
         public int Id { get; set; }
         public string? Menu_Name { get; set; }
         public int? ParentId { get; set; }
-        public int? PageId { get; set; }//
         public int? oder_no { get; set; }
-        public int? Icon { get; set; }
+        public string? Icon { get; set; }
         public string? IdUsercreate { get; set; }
         public string? IdUserupdate { get; set; }
         public DateTime? Created { get; set; }
