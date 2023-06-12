@@ -36,115 +36,78 @@ namespace Web_Doan_2023.Controllers
         }
 
         [HttpGet]
-        [Route("getAccount")]
+        [Route("getAccountAdmin")]
 
-        public async Task<IActionResult> GetAllAccount()
+        public async Task<IActionResult> getAccountAdmin(string? Fullname,string? UserName,string? Email)
         {
-
-            var result = (from a in _context.Users
-                          select new
-                          {
-                              Id = a.Id,
-
-                              Username = a.UserName,
-                              Email = a.Email,
-                              Phone = a.PhoneNumber,
-                              Address = a.ShippingAddress,
-                              AccoutType = a.AccoutType,
-                              IsLocked = a.IsLocked,
-                          }).ToList();
-            var acc = await _context.Users.ToListAsync();
-
+            var data = await ( from a in _context.Users
+                               where ( 
+                                        (Fullname == null || Fullname == "" || a.Fullname.Contains(Fullname)) &&
+                                        (UserName == null || UserName == "" || a.UserName.Contains(UserName)) &&
+                                        (Email == null || Email == "" || a.Email.Contains(Email)) && 
+                                        a.AccoutType == "Admin"
+                                     )
+                               select new {
+                                   fullname = a.Fullname,
+                                   images =a.images,
+                                   accoutType= a.AccoutType,
+                                   city = a.City,
+                                   CityName = (a.City == 0 || a.City == null) ? "null" : _context.City.Where(c=>c.Id==a.City).FirstOrDefault().NameCity,
+                                   wards = a.Wards,
+                                   WardsName = (a.Wards==0||a.Wards==null)?"null": _context.Wards.Where(c => c.Id == a.Wards).FirstOrDefault().NameWards,
+                                   district = a.District,
+                                   DistrictName = (a.District == 0 || a.District == null) ? "null" : _context.District.Where(c => c.Id == a.District).FirstOrDefault().NameDistrict,
+                                   shippingAddress =a.ShippingAddress,
+                                   idDepartment =a.idDepartment,
+                                   IsLocked =a.IsLocked,
+                                   userName =a.UserName ,
+                                   email = a.Email,
+                                   phoneNumber =a.PhoneNumber,
+                               }).ToArrayAsync();
             return Ok(new
             {
-                acc = result,
-                count = acc.Count()
+                acc = data,
+                count = data.Count()
             });
 
         }
         [HttpGet]
-        [Route("filAccount")]
+        [Route("getAccountUser")]
 
-        public async Task<IActionResult> FilterAccount(int id)
+        public async Task<IActionResult> getAccountUser(string? Fullname, string? UserName, string? Email)
         {
 
-            var result = (from a in _context.Users
-                          where a.AccoutType == (id == 1 ? "Admin" : "User")
-                          select new
-                          {
-                              Id = a.Id,
-
-                              Username = a.UserName,
-                              Email = a.Email,
-                              Phone = a.PhoneNumber,
-                              Address = a.ShippingAddress,
-                              AccoutType = a.AccoutType,
-                              IsLocked = a.IsLocked,
-                          }).ToList();
-            var acc = await _context.Users.ToListAsync();
-
+            var data = await (from a in _context.Users
+                              where (
+                                       (Fullname == null || Fullname == "" || a.Fullname.Contains(Fullname)) &&
+                                       (UserName == null || UserName == "" || a.UserName.Contains(UserName)) &&
+                                       (Email == null || Email == "" || a.Email.Contains(Email)) &&
+                                       a.AccoutType == "Admin"
+                                    )
+                              select new
+                              {
+                                  fullname = a.Fullname,
+                                  images = a.images,
+                                  accoutType = a.AccoutType,
+                                  city = a.City,
+                                  CityName = (a.City == 0 || a.City == null) ? "null" : _context.City.Where(c => c.Id == a.City).FirstOrDefault().NameCity,
+                                  wards = a.Wards,
+                                  WardsName = (a.Wards == 0 || a.Wards == null) ? "null" : _context.Wards.Where(c => c.Id == a.Wards).FirstOrDefault().NameWards,
+                                  district = a.District,
+                                  DistrictName = (a.District == 0 || a.District == null) ? "null" : _context.District.Where(c => c.Id == a.District).FirstOrDefault().NameDistrict,
+                                  shippingAddress = a.ShippingAddress,
+                                  IsLocked = a.IsLocked,
+                                  userName = a.UserName,
+                                  email = a.Email,
+                                  phoneNumber = a.PhoneNumber,
+                              }).ToArrayAsync();
             return Ok(new
             {
-                acc = result,
-                count = acc.Count()
+                acc = data,
+                count = data.Count()
             });
 
         }
-
-        //[Route("searchAccount")]
-
-        //public async Task<IActionResult> searchAccount(string txt)
-        //{
-
-        //    var result = (from a in _context.Users
-        //                  where a.UserName.Contains(txt) || a.Email.Contains(txt) || a.PhoneNumber.Contains(txt)
-        //                  select new
-        //                  {
-        //                      Id = a.Id,
-
-        //                      Username = a.UserName,
-        //                      Email = a.Email,
-        //                      Phone = a.PhoneNumber,
-        //                      Address = a.ShippingAddress,
-        //                      AccoutType = a.AccoutType,
-        //                      IsLocked = a.IsLocked,
-        //                  }).ToList();
-        //    var acc = await _context.Users.ToListAsync();
-
-        //    return Ok(new
-        //    {
-        //        acc = result,
-        //        count = acc.Count()
-        //    });
-
-        //}
-        #region
-        //[HttpGet]
-        //[Route("getAccountById")]
-
-        //public async Task<IActionResult> GetAccount(string id)
-        //{
-
-        //    var result = (from a in _context.Users
-        //                  where a.Id == id
-        //                  select new
-        //                  {
-        //                      Id = a.Id,
-        //                      Fullname = a.Fullname,
-        //                      Username = a.UserName,
-        //                      Email = a.Email,
-        //                      Phone = a.PhoneNumber,
-        //                      Address = a.ShippingAddress,
-        //                      AccoutType = a.AccoutType,
-        //                      IsLocked = a.IsLocked,
-        //                      Password = a.PasswordHash,
-        //                      Count = (from b in _context.Invoice
-        //                               where b.UserId == id
-        //                               select b.Id).Count()
-        //                  }).FirstOrDefault();
-        //    return Ok(result);
-        //}
-        #endregion
         [HttpPost]
         [Route("lockAccount")]
 
@@ -280,9 +243,6 @@ namespace Web_Doan_2023.Controllers
                     role = user.AccoutType,
                     username = user.UserName,
                     name = user.Fullname
-
-
-
                 });
             }
             return Ok(new
@@ -354,7 +314,6 @@ namespace Web_Doan_2023.Controllers
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Username,
-               
                 PhoneNumber = model.Phone,
                 City = model.Cyti,
                 District = model.District,

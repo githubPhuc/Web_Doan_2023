@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Grpc.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,111 +15,87 @@ namespace Web_Doan_2023.Controllers
     [ApiController]
     public class CitiesController : ControllerBase
     {
-        private readonly Web_Doan_2023Context _context;
+        private readonly Web_Doan_2023Context db_;
 
         public CitiesController(Web_Doan_2023Context context)
         {
-            _context = context;
+            db_ = context;
         }
 
         // GET: api/Cities
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<City>>> GetCity()
+        public async Task<IActionResult> GetCity(string ?name)
         {
-          if (_context.City == null)
-          {
-              return NotFound();
-          }
-            return await _context.City.ToListAsync();
+            var data = await (from a in db_.City
+                              where (
+                                       (name == null || name == "" || a.NameCity.Contains(name))
+                                    )
+                              select new
+                              {
+                                  Id=a.Id,
+                                  Name=a.NameCity,
+                                  Status=a.Status,
+                              }).ToArrayAsync();
+            return Ok(new
+            {
+                acc = data,
+                count = data.Count()
+            });
         }
-
-        // GET: api/Cities/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<City>> GetCity(int id)
-        {
-          if (_context.City == null)
-          {
-              return NotFound();
-          }
-            var city = await _context.City.FindAsync(id);
-
-            if (city == null)
-            {
-                return NotFound();
-            }
-
-            return city;
-        }
-
-        // PUT: api/Cities/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCity(int id, City city)
-        {
-            if (id != city.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(city).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CityExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
         // POST: api/Cities
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<City>> PostCity(City city)
+        public async Task<ActionResult<City>> PostCity(string CityName)
         {
-          if (_context.City == null)
-          {
-              return Problem("Entity set 'Web_Doan_2023Context.City'  is null.");
-          }
-            _context.City.Add(city);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetCity", new { id = city.Id }, city);
+            if(String.IsNullOrEmpty(CityName))
+            {
+                return Ok(new Response { Status = "Failed", Message = "City name is null!" });
+            }
+            else
+            {
+                var check =await db_.City.Where(a=>a.NameCity==CityName).ToListAsync();
+                if(check.Count()>0)
+                {
+                    return Ok(new Response { Status = "Failed", Message = "City name exists in database!" });
+                }
+                var data = new City()
+                {
+                    NameCity = CityName,
+                    Status = true,
+                };
+                db_.City.Add(data);
+                await db_.SaveChangesAsync();
+                return Ok(new Response { Status = "Success", Message = "City created successfully!" });
+            }
         }
 
         // DELETE: api/Cities/5
-        [HttpDelete("{id}")]
+        [HttpPost("DeleteCity")]
         public async Task<IActionResult> DeleteCity(int id)
         {
-            if (_context.City == null)
+            var checkDistrict= await db_.District.Where(a=>a.IdCity ==id).ToListAsync();
+            if (checkDistrict.Count() > 0)
             {
-                return NotFound();
+                return Ok(new Response { Status = "Failed", Message = "District in database!" });
             }
-            var city = await _context.City.FindAsync(id);
-            if (city == null)
+            else
             {
-                return NotFound();
+                var data = await db_.City.FirstOrDefaultAsync(a => a.Id == id);
+                if (data != null)
+                {
+                    db_.City.Remove(data);
+                    await db_.SaveChangesAsync();
+
+                    return Ok(new Response { Status = "Success", Message = "City delete successfully!" });
+                }
+                return Ok(new Response { Status = "Failed", Message = "City delete failed!" });
             }
 
-            _context.City.Remove(city);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
 
         private bool CityExists(int id)
         {
-            return (_context.City?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (db_.City?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,111 +15,85 @@ namespace Web_Doan_2023.Controllers
     [ApiController]
     public class WardsController : ControllerBase
     {
-        private readonly Web_Doan_2023Context _context;
+        private readonly Web_Doan_2023Context db_;
 
         public WardsController(Web_Doan_2023Context context)
         {
-            _context = context;
+            db_ = context;
         }
 
         // GET: api/Wards
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Wards>>> GetWards()
+        public async Task<IActionResult> GetWards(string ?name)
         {
-          if (_context.Wards == null)
-          {
-              return NotFound();
-          }
-            return await _context.Wards.ToListAsync();
-        }
-
-        // GET: api/Wards/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Wards>> GetWards(int id)
-        {
-          if (_context.Wards == null)
-          {
-              return NotFound();
-          }
-            var wards = await _context.Wards.FindAsync(id);
-
-            if (wards == null)
+            var data = await (from a in db_.Wards
+                              join b in db_.District on a.IdDistrict equals b.Id
+                              join c in db_.City on a.IdCity equals c.Id
+                              where (name == null || name == "" || a.NameWards.Contains(name))
+                              select new
+                              {
+                                  Id = a.Id,
+                                  NameWards = a.NameWards,
+                                  NameDistrict = b.NameDistrict,
+                                  NameCity = c.NameCity,
+                                  Status = a.Status,
+                              }).ToArrayAsync();
+            return Ok(new
             {
-                return NotFound();
-            }
-
-            return wards;
-        }
-
-        // PUT: api/Wards/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutWards(int id, Wards wards)
-        {
-            if (id != wards.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(wards).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!WardsExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+                acc = data,
+                count = data.Count()
+            });
         }
 
         // POST: api/Wards
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Wards>> PostWards(Wards wards)
+        public async Task<ActionResult<Wards>> PostWards(string NameWards,int IdDistrict,int IdCity)
         {
-          if (_context.Wards == null)
-          {
-              return Problem("Entity set 'Web_Doan_2023Context.Wards'  is null.");
-          }
-            _context.Wards.Add(wards);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetWards", new { id = wards.Id }, wards);
+            if (String.IsNullOrEmpty(NameWards))
+            {
+                return Ok(new Response { Status = "Failed", Message = "City name is null!" });
+            }
+            else
+            {
+                var check = await db_.Wards.Where(a => a.NameWards == NameWards && a.IdDistrict == IdDistrict && a.IdCity ==IdCity).ToListAsync();
+                if (check.Count() > 0)
+                {
+                    return Ok(new Response { Status = "Failed", Message = "Wards name exists in database!" });
+                }
+                var data = new Wards()
+                {
+                    IdCity = IdCity,
+                    IdDistrict = IdDistrict,
+                    NameWards = NameWards,
+                    Status = true,
+                };
+                db_.Wards.Add(data);
+                await db_.SaveChangesAsync();
+                return Ok(new Response { Status = "Success", Message = "District created successfully!" });
+            }
         }
 
         // DELETE: api/Wards/5
-        [HttpDelete("{id}")]
+        [HttpPost("DeleteWards")]
         public async Task<IActionResult> DeleteWards(int id)
         {
-            if (_context.Wards == null)
+          
+            var data = await db_.Wards.FirstOrDefaultAsync(a => a.Id == id);
+            if (data != null)
             {
-                return NotFound();
-            }
-            var wards = await _context.Wards.FindAsync(id);
-            if (wards == null)
-            {
-                return NotFound();
-            }
+                db_.Wards.Remove(data);
+                await db_.SaveChangesAsync();
 
-            _context.Wards.Remove(wards);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+                return Ok(new Response { Status = "Success", Message = "Wards delete successfully!" });
+            }
+            return Ok(new Response { Status = "Failed", Message = "Wards delete failed!" });
+           
         }
 
         private bool WardsExists(int id)
         {
-            return (_context.Wards?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (db_.Wards?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

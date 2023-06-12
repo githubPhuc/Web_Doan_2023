@@ -32,55 +32,6 @@ namespace Web_Doan_2023.Controllers
             return await _context.ColorProduct.ToListAsync();
         }
 
-        // GET: api/ColorProducts/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ColorProduct>> GetColorProduct(int id)
-        {
-          if (_context.ColorProduct == null)
-          {
-              return NotFound();
-          }
-            var colorProduct = await _context.ColorProduct.FindAsync(id);
-
-            if (colorProduct == null)
-            {
-                return NotFound();
-            }
-
-            return colorProduct;
-        }
-
-        // PUT: api/ColorProducts/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutColorProduct(int id, ColorProduct colorProduct)
-        {
-            if (id != colorProduct.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(colorProduct).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ColorProductExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
         // POST: api/ColorProducts
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -91,7 +42,7 @@ namespace Web_Doan_2023.Controllers
               return Problem("Entity set 'Web_Doan_2023Context.ColorProduct'  is null.");
           }
             _context.ColorProduct.Add(colorProduct);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();// Mai làm check code color Trần Ninh Phuc
 
             return CreatedAtAction("GetColorProduct", new { id = colorProduct.Id }, colorProduct);
         }

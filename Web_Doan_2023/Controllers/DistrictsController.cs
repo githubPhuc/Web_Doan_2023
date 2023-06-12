@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,111 +15,107 @@ namespace Web_Doan_2023.Controllers
     [ApiController]
     public class DistrictsController : ControllerBase
     {
-        private readonly Web_Doan_2023Context _context;
+        private readonly Web_Doan_2023Context db_;
 
         public DistrictsController(Web_Doan_2023Context context)
         {
-            _context = context;
+            db_ = context;
         }
 
         // GET: api/Districts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<District>>> GetDistrict()
+        public async Task<IActionResult> GetDistrict(string ?name)
         {
-          if (_context.District == null)
-          {
-              return NotFound();
-          }
-            return await _context.District.ToListAsync();
+            var data = await (from a in db_.District
+                              join b in db_.City on a.IdCity equals b.Id
+                                where (name == null || name == "" || a.NameDistrict.Contains(name))
+                                select new
+                                {
+                                    Id = a.Id,
+                                    NameDistrict = a.NameDistrict,
+                                    NameCity = b.NameCity,
+                                    Status = a.Status,
+                                }).ToArrayAsync();
+            return Ok(new
+            {
+                acc = data,
+                count = data.Count()
+            });
         }
-
-        // GET: api/Districts/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<District>> GetDistrict(int id)
+        // GET: api/Districts
+        [HttpGet("LoadOnCity")]
+        public async Task<IActionResult> Load_On_City(int idCity)
         {
-          if (_context.District == null)
-          {
-              return NotFound();
-          }
-            var district = await _context.District.FindAsync(id);
-
-            if (district == null)
+            var data = await (from a in db_.District
+                              where a.IdCity == idCity
+                              select new
+                              {
+                                  Id = a.Id,
+                                  NameDistrict = a.NameDistrict,
+                                  Status = a.Status,
+                              }).ToArrayAsync();
+            return Ok(new
             {
-                return NotFound();
-            }
-
-            return district;
-        }
-
-        // PUT: api/Districts/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutDistrict(int id, District district)
-        {
-            if (id != district.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(district).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DistrictExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+                acc = data,
+                count = data.Count()
+            });
         }
 
         // POST: api/Districts
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<District>> PostDistrict(District district)
+        public async Task<ActionResult<District>> PostDistrict(string NameDistrict, int idCity)
         {
-          if (_context.District == null)
-          {
-              return Problem("Entity set 'Web_Doan_2023Context.District'  is null.");
-          }
-            _context.District.Add(district);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetDistrict", new { id = district.Id }, district);
+            if (String.IsNullOrEmpty(NameDistrict))
+            {
+                return Ok(new Response { Status = "Failed", Message = "City name is null!" });
+            }
+            else
+            {
+                var check = await db_.District.Where(a => a.NameDistrict == NameDistrict&& a.IdCity ==idCity).ToListAsync();
+                if (check.Count() > 0)
+                {
+                    return Ok(new Response { Status = "Failed", Message = "District name exists in database!" });
+                }
+                var data = new District()
+                {
+                    IdCity= idCity,
+                    NameDistrict = NameDistrict,
+                    Status = true,
+                };
+                db_.District.Add(data);
+                await db_.SaveChangesAsync();
+                return Ok(new Response { Status = "Success", Message = "District created successfully!" });
+            }
         }
 
         // DELETE: api/Districts/5
-        [HttpDelete("{id}")]
+        [HttpPost("DeleteDistrict")]
         public async Task<IActionResult> DeleteDistrict(int id)
         {
-            if (_context.District == null)
+            var checkWards = await db_.Wards.Where(a => a.IdDistrict == id).ToListAsync();
+            if (checkWards.Count() > 0)
             {
-                return NotFound();
+                return Ok(new Response { Status = "Failed", Message = "Wards in database!" });
             }
-            var district = await _context.District.FindAsync(id);
-            if (district == null)
+            else
             {
-                return NotFound();
+                var data = await db_.District.FirstOrDefaultAsync(a => a.Id == id);
+                if (data != null)
+                {
+                    db_.District.Remove(data);
+                    await db_.SaveChangesAsync();
+
+                    return Ok(new Response { Status = "Success", Message = "District delete successfully!" });
+                }
+                return Ok(new Response { Status = "Failed", Message = "District delete failed!" });
             }
 
-            _context.District.Remove(district);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
 
         private bool DistrictExists(int id)
         {
-            return (_context.District?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (db_.District?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

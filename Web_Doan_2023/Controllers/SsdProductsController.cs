@@ -36,6 +36,7 @@ namespace Web_Doan_2023.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<SsdProduct>> GetSsdProduct(int id)
         {
+
           if (_context.SsdProduct == null)
           {
               return NotFound();

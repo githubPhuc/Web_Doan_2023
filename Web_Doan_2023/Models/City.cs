@@ -5,7 +5,7 @@
         public int Id { get; set; }
         public string? NameCity { get; set; }
         public bool Status { get; set; }
-        public List<District> _Districts { get; set; }
-        public List<Wards> _Wards { get; set; }
+        public List<District>? _Districts { get; set; }
+        public List<Wards>? _Wards { get; set; }
     }
 }

@@ -86,8 +86,6 @@ namespace Web_Doan_2023.Controllers
         [HttpPost]
         public async Task<ActionResult<RamProduct>> PostRamProduct(RamProduct ramProduct)
         {
-          
-
             if (ramProduct.nameRam == null || ramProduct.nameRam == "")
             {
                 return Ok(new Response { Status = "Failed", Message = "Name Ram not null!" });
@@ -115,18 +113,18 @@ namespace Web_Doan_2023.Controllers
         {
             if (_context.RamProduct == null)
             {
-                return NotFound();
+                return Ok(new Response { Status = "Failed", Message = "Ram exist!" });
             }
             var ramProduct = await _context.RamProduct.FindAsync(id);
             if (ramProduct == null)
             {
-                return NotFound();
+                return Ok(new Response { Status = "Failed", Message = "Ram not in the database!" });
             }
 
             _context.RamProduct.Remove(ramProduct);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(new Response { Status = "Success", Message = "Ram delete successfully!" });
         }
 
         private bool RamProductExists(int id)

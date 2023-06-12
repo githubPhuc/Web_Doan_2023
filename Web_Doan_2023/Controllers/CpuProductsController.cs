@@ -32,88 +32,52 @@ namespace Web_Doan_2023.Controllers
             return await _context.CpuProduct.ToListAsync();
         }
 
-        // GET: api/CpuProducts/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<CpuProduct>> GetCpuProduct(int id)
-        {
-          if (_context.CpuProduct == null)
-          {
-              return NotFound();
-          }
-            var cpuProduct = await _context.CpuProduct.FindAsync(id);
-
-            if (cpuProduct == null)
-            {
-                return NotFound();
-            }
-
-            return cpuProduct;
-        }
-
-        // PUT: api/CpuProducts/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCpuProduct(int id, CpuProduct cpuProduct)
-        {
-            if (id != cpuProduct.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(cpuProduct).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CpuProductExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
+      
 
         // POST: api/CpuProducts
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<CpuProduct>> PostCpuProduct(CpuProduct cpuProduct)
+        public async Task<ActionResult<CpuProduct>> PostCpuProduct(CpuProduct data)
         {
-          if (_context.CpuProduct == null)
-          {
-              return Problem("Entity set 'Web_Doan_2023Context.CpuProduct'  is null.");
-          }
-            _context.CpuProduct.Add(cpuProduct);
+            if (data.Name == null || data.Name == "")
+            {
+                return Ok(new Response { Status = "Failed", Message = "Name Cpu not null!" });
+            }
+            if (_context.CpuProduct == null)
+            {
+                return Ok(new Response { Status = "Failed", Message = "Cpu exist!" });
+            }
+            var dataCheck = _context.CpuProduct.Where(a => a.Name == data.Name && a.TechnicalData == data.TechnicalData).ToList();
+            if (dataCheck.Count() > 0)
+            {
+                return Ok(new Response { Status = "Failed", Message = "Cpu name and Technical Data exist!" });
+            }
+
+            _context.CpuProduct.Add(data);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCpuProduct", new { id = cpuProduct.Id }, cpuProduct);
+
+            return Ok(new Response { Status = "Success", Message = "Cpu created successfully!" });
         }
 
         // DELETE: api/CpuProducts/5
-        [HttpDelete("{id}")]
+        [HttpPost("DeleteCpu")]
         public async Task<IActionResult> DeleteCpuProduct(int id)
         {
             if (_context.CpuProduct == null)
             {
-                return NotFound();
+                return Ok(new Response { Status = "Failed", Message = "Cpu exist!" });
             }
-            var cpuProduct = await _context.CpuProduct.FindAsync(id);
-            if (cpuProduct == null)
+            var data = await _context.CpuProduct.FindAsync(id);
+            if (data == null)
             {
-                return NotFound();
+                return Ok(new Response { Status = "Failed", Message = "Cpu not in the database!" });
             }
 
-            _context.CpuProduct.Remove(cpuProduct);
+            _context.CpuProduct.Remove(data);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(new Response { Status = "Success", Message = "Cpu delete successfully!" });
         }
 
         private bool CpuProductExists(int id)

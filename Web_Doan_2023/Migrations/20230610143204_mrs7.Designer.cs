@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Web_Doan_2023.Data;
 
@@ -11,9 +12,10 @@ using Web_Doan_2023.Data;
 namespace Web_Doan_2023.Migrations
 {
     [DbContext(typeof(Web_Doan_2023Context))]
-    partial class Web_Doan_2023ContextModelSnapshot : ModelSnapshot
+    [Migration("20230610143204_mrs7")]
+    partial class mrs7
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -410,7 +412,7 @@ namespace Web_Doan_2023.Migrations
                     b.Property<int?>("CityId")
                         .HasColumnType("int");
 
-                    b.Property<int>("IdCity")
+                    b.Property<int?>("IdDistrict")
                         .HasColumnType("int");
 
                     b.Property<string>("NameDistrict")
@@ -1004,6 +1006,7 @@ namespace Web_Doan_2023.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("NameWards")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("Status")

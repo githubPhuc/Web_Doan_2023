@@ -83,24 +83,24 @@ namespace Web_Doan_2023.Controllers
         }
 
         // DELETE: api/Menus/5
-        [HttpDelete("{id}")]
+        [HttpPost("DeleteMenu")]
         public async Task<IActionResult> DeleteMenu(int id)
         {
-           
+
             if (_context.Menu == null)
             {
-                return NotFound();
+                return Ok(new Response { Status = "Failed", Message = "Menu exist!" });
             }
-            var menu = await _context.Menu.FindAsync(id);
-            if (menu == null)
+            var Menu = await _context.Menu.FindAsync(id);
+            if (Menu == null)
             {
-                return NotFound();
+                return Ok(new Response { Status = "Failed", Message = "Menu not in the database!" });
             }
 
-            _context.Menu.Remove(menu);
+            _context.Menu.Remove(Menu);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(new Response { Status = "Success", Message = "Menu delete successfully!" });
         }
 
         private bool MenuExists(int id)
