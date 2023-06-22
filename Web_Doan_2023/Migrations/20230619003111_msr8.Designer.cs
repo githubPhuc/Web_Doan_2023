@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Web_Doan_2023.Data;
 
@@ -11,9 +12,10 @@ using Web_Doan_2023.Data;
 namespace Web_Doan_2023.Migrations
 {
     [DbContext(typeof(Web_Doan_2023Context))]
-    partial class Web_Doan_2023ContextModelSnapshot : ModelSnapshot
+    [Migration("20230619003111_msr8")]
+    partial class msr8
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -321,57 +323,6 @@ namespace Web_Doan_2023.Migrations
                     b.ToTable("ColorProduct");
                 });
 
-            modelBuilder.Entity("Web_Doan_2023.Models.Comment", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"), 1L, 1);
-
-                    b.Property<int?>("BottomLevel")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Content")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("TopLevel")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("Updated")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("id");
-
-                    b.ToTable("Comment");
-                });
-
-            modelBuilder.Entity("Web_Doan_2023.Models.CommentProduct", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"), 1L, 1);
-
-                    b.Property<int>("IdComment")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("idProduct")
-                        .HasColumnType("int");
-
-                    b.HasKey("id");
-
-                    b.ToTable("CommentProduct");
-                });
-
             modelBuilder.Entity("Web_Doan_2023.Models.CpuProduct", b =>
                 {
                     b.Property<int>("Id")
@@ -618,9 +569,6 @@ namespace Web_Doan_2023.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("PathImage")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int?>("ProductId")
                         .HasColumnType("int");
 
@@ -712,25 +660,6 @@ namespace Web_Doan_2023.Migrations
                     b.ToTable("Menu");
                 });
 
-            modelBuilder.Entity("Web_Doan_2023.Models.PortConnection", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TechnicalData")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("PortConnection");
-                });
-
             modelBuilder.Entity("Web_Doan_2023.Models.Producer", b =>
                 {
                     b.Property<int>("Id")
@@ -779,14 +708,11 @@ namespace Web_Doan_2023.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int?>("AccessoriesIncluded")
-                        .HasColumnType("int");
+                    b.Property<string>("AccessoriesIncluded")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("CPUProduct")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("CardDisplay")
-                        .HasColumnType("int");
+                    b.Property<string>("CPUProduct")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("CartProductId")
                         .HasColumnType("int");
@@ -794,29 +720,29 @@ namespace Web_Doan_2023.Migrations
                     b.Property<int?>("CategoryProductId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ColorProduct")
-                        .HasColumnType("int");
+                    b.Property<string>("ColorProduct")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("DisplayProduct")
-                        .HasColumnType("int");
+                    b.Property<string>("DisplayProduct")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool?>("IsDelete")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("MainProduct")
-                        .HasColumnType("int");
+                    b.Property<string>("MainProduct")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("ProducerId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("RamProduct")
-                        .HasColumnType("int");
+                    b.Property<string>("RamProduct")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("SSDProduct")
-                        .HasColumnType("int");
+                    b.Property<string>("SSDProduct")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool?>("Status")
                         .HasColumnType("bit");
@@ -833,11 +759,11 @@ namespace Web_Doan_2023.Migrations
                     b.Property<int>("idSale")
                         .HasColumnType("int");
 
-                    b.Property<string>("nameProduct")
+                    b.Property<string>("nameCategory")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("portConnection")
-                        .HasColumnType("int");
+                    b.Property<string>("nameProduct")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("price")
                         .HasColumnType("decimal(18,2)");

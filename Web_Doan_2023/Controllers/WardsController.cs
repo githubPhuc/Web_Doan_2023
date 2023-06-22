@@ -44,6 +44,28 @@ namespace Web_Doan_2023.Controllers
                 count = data.Count()
             });
         }
+        [HttpGet("GetWardOnDistrictAndCity")]
+        public async Task<IActionResult> GetWardOnDistrictAndCity(int IdCity,int IdDistrict)
+        {
+            var data =await( from a in db_.Wards
+                             join b in db_.City on a.IdCity equals b.Id
+                             join c in db_.District on a.IdDistrict equals c.Id
+                             where b.Id==IdCity && c.Id== IdDistrict
+                             select new
+                             {
+                                 Id = a.Id,
+                                 NameWards = a.NameWards,
+                                 NameDistrict = c.NameDistrict,
+                                 NameCity = b.NameCity,
+                                 Status = a.Status,
+                             }
+                             ).ToListAsync();
+            return Ok(new
+            {
+                acc = data,
+                count = data.Count()
+            });
+        }
 
         // POST: api/Wards
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754

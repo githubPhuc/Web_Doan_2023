@@ -39,5 +39,9 @@ namespace Web_Doan_2023.Data
         public DbSet<Web_Doan_2023.Models.ColorProduct>? ColorProduct { get; set; }
         public DbSet<Web_Doan_2023.Models.DisplayProduct>? DisplayProduct { get; set; }
         public DbSet<Web_Doan_2023.Models.SsdProduct>? SsdProduct { get; set; }
+        public DbSet<Web_Doan_2023.Models.CardDisplay>? CardDisplay { get; set; }
+        public DbSet<Web_Doan_2023.Models.PortConnection>? PortConnection { get; set; }
+        public DbSet<Web_Doan_2023.Models.Comment>? Comment { get; set; }
+        public DbSet<Web_Doan_2023.Models.CommentProduct>? CommentProduct { get; set; }
     }
 }

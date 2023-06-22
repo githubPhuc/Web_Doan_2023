@@ -38,7 +38,6 @@ namespace Web_Doan_2023.Controllers
                               Id = a.Id,
                               codeproduct = a.codeProduct,
                               nameproduct = a.nameProduct,
-                              categoryproduct = a.nameCategory,
                               Descriptionproduct = a.Description,
                               produceproduct = b.nameProduce,
                           }).ToArray();
@@ -66,7 +65,6 @@ namespace Web_Doan_2023.Controllers
                            Id = a.Id,
                            codeproduct = a.codeProduct,
                            nameproduct = a.nameProduct,
-                           categoryproduct = a.nameCategory,
                            Descriptionproduct = a.Description,
                            mainproduct = a.MainProduct,
                            ramProduct = a.RamProduct,
@@ -105,7 +103,6 @@ namespace Web_Doan_2023.Controllers
                             Id = a.Id,
                             codeproduct = a.codeProduct,
                             nameproduct = a.nameProduct,
-                            categoryproduct = a.nameCategory,
                             Descriptionproduct = a.Description,
                             mainproduct = a.MainProduct,
                             ramProduct = a.RamProduct,
@@ -130,53 +127,20 @@ namespace Web_Doan_2023.Controllers
             });
         }
 
-        // PUT: api/Products/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutProduct(int id, Product product)
-        {
-            if (id != product.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(product).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProductExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
+       
 
         // POST: api/Products
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Product>> createProduct(Product product, List<IFormFile> uploadFile)
+        public async Task<ActionResult<Product>> createProduct(Product product)
         {
-            if (_context.Product == null)
-            {
-                return Ok(new Response { Status = "Failed", Message = "Entity set 'Web_Doan_2023Context.Product'  is null.!" });
-            }
+            
             if (ModelState.IsValid)
             {
-                int idCate = product.idCategory;
-                var nameCate= _context.CategoryProduct.Where(a=>a.Id==idCate).Select(a=>a.nameCategory); 
+                var codeColor = _context.ColorProduct.Where(a => a.Id == product.Id).FirstOrDefault();
                 var pro = new Product()
                 {
-                    codeProduct = product.codeProduct.ToUpper() + product.ColorProduct.ToUpper(),
+                    codeProduct = product.codeProduct.ToUpper() + codeColor.code.ToUpper(),
                     nameProduct = product.nameProduct,
                     Description = product.Description,
                     price = product.price,
@@ -187,8 +151,6 @@ namespace Web_Doan_2023.Controllers
                     idCategory = product.idCategory,
                     SSDProduct = product.SSDProduct,
                     idProducer = product.idProducer,
-                    images= null,
-                    nameCategory = nameCate.FirstOrDefault(),
                     MainProduct = product.MainProduct,
                     ColorProduct = product.ColorProduct,
                     IsDelete = false,

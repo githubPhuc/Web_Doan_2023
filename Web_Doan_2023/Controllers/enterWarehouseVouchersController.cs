@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -14,111 +15,57 @@ namespace Web_Doan_2023.Controllers
     [ApiController]
     public class enterWarehouseVouchersController : ControllerBase
     {
-        private readonly Web_Doan_2023Context _context;
+        private readonly Web_Doan_2023Context db_;
 
         public enterWarehouseVouchersController(Web_Doan_2023Context context)
         {
-            _context = context;
+            db_ = context;
         }
-
-        // GET: api/enterWarehouseVouchers
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<enterWarehouseVouchers>>> GetenterWarehouseVouchers()
+        [HttpGet("GetList")]
+        public async Task<ActionResult> _GetList(string? code,string? dateStar,string? DateEnd)
         {
-          if (_context.enterWarehouseVouchers == null)
-          {
-              return NotFound();
-          }
-            return await _context.enterWarehouseVouchers.ToListAsync();
-        }
-
-        // GET: api/enterWarehouseVouchers/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<enterWarehouseVouchers>> GetenterWarehouseVouchers(int id)
-        {
-          if (_context.enterWarehouseVouchers == null)
-          {
-              return NotFound();
-          }
-            var enterWarehouseVouchers = await _context.enterWarehouseVouchers.FindAsync(id);
-
-            if (enterWarehouseVouchers == null)
+            CultureInfo cul = CultureInfo.GetCultureInfo("en-GB");
+            var _NgayBatDau = new DateTime();
+            var _NgayKetthuc = new DateTime();
+            DateTime _NgayBD = new DateTime();
+            DateTime _NgayKT = new DateTime();
+            if (!string.IsNullOrEmpty(dateStar))
             {
-                return NotFound();
-            }
-
-            return enterWarehouseVouchers;
-        }
-
-        // PUT: api/enterWarehouseVouchers/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutenterWarehouseVouchers(int id, enterWarehouseVouchers enterWarehouseVouchers)
-        {
-            if (id != enterWarehouseVouchers.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(enterWarehouseVouchers).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!enterWarehouseVouchersExists(id))
+                try
                 {
-                    return NotFound();
+                    _NgayBatDau = DateTime.ParseExact(dateStar, "dd/MM/yyyy", cul);
+
+                    _NgayBD = new DateTime(_NgayBatDau.Year, _NgayBatDau.Month, _NgayBatDau.Day, 0, 0, 0);
                 }
-                else
+                catch (Exception ex)
                 {
-                    throw;
+                    throw new Exception(ex.Message);
                 }
             }
-
-            return NoContent();
-        }
-
-        // POST: api/enterWarehouseVouchers
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<enterWarehouseVouchers>> PostenterWarehouseVouchers(enterWarehouseVouchers enterWarehouseVouchers)
-        {
-          if (_context.enterWarehouseVouchers == null)
-          {
-              return Problem("Entity set 'Web_Doan_2023Context.enterWarehouseVouchers'  is null.");
-          }
-            _context.enterWarehouseVouchers.Add(enterWarehouseVouchers);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetenterWarehouseVouchers", new { id = enterWarehouseVouchers.Id }, enterWarehouseVouchers);
-        }
-
-        // DELETE: api/enterWarehouseVouchers/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteenterWarehouseVouchers(int id)
-        {
-            if (_context.enterWarehouseVouchers == null)
+            if (!string.IsNullOrEmpty(DateEnd))
             {
-                return NotFound();
+                try
+                {
+                    _NgayKetthuc = DateTime.ParseExact(DateEnd, "dd/MM/yyyy", cul);
+
+                    _NgayKT = new DateTime(_NgayKetthuc.Year, _NgayKetthuc.Month, _NgayKetthuc.Day, 0, 0, 0);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception(ex.Message);
+                }
             }
-            var enterWarehouseVouchers = await _context.enterWarehouseVouchers.FindAsync(id);
-            if (enterWarehouseVouchers == null)
+            var data = await db_.enterWarehouseVouchers.Where(
+                a=>(code == null|| code == ""||a.codeEnterWarehouseVouchers.Contains(code))
+               
+                ).ToListAsync();
+            return Ok(new
             {
-                return NotFound();
-            }
-
-            _context.enterWarehouseVouchers.Remove(enterWarehouseVouchers);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+                acc = data,
+                count = data.Count()
+            });
         }
 
-        private bool enterWarehouseVouchersExists(int id)
-        {
-            return (_context.enterWarehouseVouchers?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
+
     }
 }
