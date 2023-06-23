@@ -22,42 +22,12 @@ namespace Web_Doan_2023.Controllers
             db_ = context;
         }
         [HttpGet("GetList")]
-        public async Task<ActionResult> _GetList(string? code,string? dateStar,string? DateEnd)
+        public async Task<ActionResult> _GetList(string? code)
         {
-            CultureInfo cul = CultureInfo.GetCultureInfo("en-GB");
-            var _NgayBatDau = new DateTime();
-            var _NgayKetthuc = new DateTime();
-            DateTime _NgayBD = new DateTime();
-            DateTime _NgayKT = new DateTime();
-            if (!string.IsNullOrEmpty(dateStar))
-            {
-                try
-                {
-                    _NgayBatDau = DateTime.ParseExact(dateStar, "dd/MM/yyyy", cul);
 
-                    _NgayBD = new DateTime(_NgayBatDau.Year, _NgayBatDau.Month, _NgayBatDau.Day, 0, 0, 0);
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception(ex.Message);
-                }
-            }
-            if (!string.IsNullOrEmpty(DateEnd))
-            {
-                try
-                {
-                    _NgayKetthuc = DateTime.ParseExact(DateEnd, "dd/MM/yyyy", cul);
-
-                    _NgayKT = new DateTime(_NgayKetthuc.Year, _NgayKetthuc.Month, _NgayKetthuc.Day, 0, 0, 0);
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception(ex.Message);
-                }
-            }
             var data = await db_.enterWarehouseVouchers.Where(
-                a=>(code == null|| code == ""||a.codeEnterWarehouseVouchers.Contains(code))
-               
+                a => (code == null || code == "" || a.codeEnterWarehouseVouchers.Contains(code))
+
                 ).ToListAsync();
             return Ok(new
             {
@@ -69,3 +39,5 @@ namespace Web_Doan_2023.Controllers
 
     }
 }
+
+
