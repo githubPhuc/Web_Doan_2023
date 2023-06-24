@@ -44,6 +44,7 @@ namespace Web_Doan_2023.Controllers
                 count = data.Count()
             });
         }
+
         [HttpGet("GetWardOnDistrictAndCity")]
         public async Task<IActionResult> GetWardOnDistrictAndCity(int IdCity,int IdDistrict)
         {

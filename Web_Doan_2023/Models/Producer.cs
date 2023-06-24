@@ -14,6 +14,7 @@ namespace Web_Doan_2023.Models
         public int? idDistrict { get; set; }
         public string? Location { get; set; }
         public bool Status { get; set; }
+        public string? logoProducer { get; set; }
         public List<Product>? Products { get; set; }
 
 
