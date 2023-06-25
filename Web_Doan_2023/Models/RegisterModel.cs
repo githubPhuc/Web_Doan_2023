@@ -25,6 +25,7 @@ namespace Web_Doan_2023.Models
         public int? District { get; set; }
         [Required(ErrorMessage = "District is required")]
         public string? ShippingAddress { get; set; }
+        public int idDepartment { get; set; }
 
     }
 }

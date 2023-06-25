@@ -37,39 +37,75 @@ namespace Web_Doan_2023.Controllers
 
         [HttpGet]
         [Route("getAccountAdmin")]
-
-        public async Task<IActionResult> getAccountAdmin(string? Fullname,string? UserName,string? Email)
+        public async Task<IActionResult> getAccountAdmin(string? Fullname, string? UserName, string? Email)
         {
-            string dataa = GetImagebycode("image-2002.png");
-            var data = await ( from a in _context.Users
-                               where ( 
-                                        (Fullname == null || Fullname == "" || a.Fullname.Contains(Fullname)) &&
-                                        (UserName == null || UserName == "" || a.UserName.Contains(UserName)) &&
-                                        (Email == null || Email == "" || a.Email.Contains(Email)) && 
-                                        a.AccoutType == "Admin"
-                                     )
-                               select new {
-                                   fullname = a.Fullname,
-                                   images = a.images.Trim(),
-                                   ProductImage = "https://localhost:7109/image/Account/" + a.images,
-                                   accoutType = a.AccoutType,
-                                   city = a.City,
-                                   CityName = (a.City == 0 || a.City == null) ? "null" : _context.City.Where(c=>c.Id==a.City).FirstOrDefault().NameCity,
-                                   wards = a.Wards,
-                                   WardsName = (a.Wards==0||a.Wards==null)?"null": _context.Wards.Where(c => c.Id == a.Wards).FirstOrDefault().NameWards,
-                                   district = a.District,
-                                   DistrictName = (a.District == 0 || a.District == null) ? "null" : _context.District.Where(c => c.Id == a.District).FirstOrDefault().NameDistrict,
-                                   shippingAddress =a.ShippingAddress,
-                                   idDepartment =a.idDepartment,
-                                   IsLocked =a.IsLocked,
-                                   userName =a.UserName ,
-                                   email = a.Email,
-                                   phoneNumber =a.PhoneNumber,
-                               }).ToArrayAsync();
+            var data = await (from a in _context.Users
+                              where (
+                                       (Fullname == null || Fullname == "" || a.Fullname.Contains(Fullname)) &&
+                                       (UserName == null || UserName == "" || a.UserName.Contains(UserName)) &&
+                                       (Email == null || Email == "" || a.Email.Contains(Email)) &&
+                                       a.AccoutType == "Admin"
+                                       && a.IsLocked == false
+                                    )
+                              select new
+                              {
+                                  fullname = a.Fullname,
+                                  images = a.images,
+                                  ProductImage = "https://localhost:7109/image/Account/" + a.images,
+                                  accoutType = a.AccoutType,
+                                  city = a.City,
+                                  CityName = (a.City == 0 || a.City == null) ? "null" : _context.City.Where(c => c.Id == a.City).FirstOrDefault().NameCity,
+                                  wards = a.Wards,
+                                  WardsName = (a.Wards == 0 || a.Wards == null) ? "null" : _context.Wards.Where(c => c.Id == a.Wards).FirstOrDefault().NameWards,
+                                  district = a.District,
+                                  DistrictName = (a.District == 0 || a.District == null) ? "null" : _context.District.Where(c => c.Id == a.District).FirstOrDefault().NameDistrict,
+                                  shippingAddress = a.ShippingAddress,
+                                  idDepartment = a.idDepartment,
+                                  department = (a.idDepartment == 0 || a.idDepartment == null) ? "null" : _context.Department.Where(c => c.Id == a.idDepartment).FirstOrDefault().nameDepartment,
+                                  IsLocked = a.IsLocked,
+                                  userName = a.UserName,
+                                  email = a.Email,
+                                  phoneNumber = a.PhoneNumber,
+                              }).ToArrayAsync();
             return Ok(new
             {
                 acc = data,
                 count = data.Count()
+            });
+
+        }
+
+
+        [HttpGet("getAccountByUsername")]
+        public async Task<IActionResult> getAccountByUsername(string UserName)
+        {
+            var data = await (from a in _context.Users
+                              where a.UserName == UserName && a.IsLocked == false && a.AccoutType == "Admin"
+
+                              select new
+                              {
+                                  fullname = a.Fullname,
+                                  images = a.images.Trim(),
+                                  ProductImage = "https://localhost:7109/image/Account/" + a.images,
+                                  accoutType = a.AccoutType,
+                                  city = a.City,
+                                  CityName = (a.City == 0 || a.City == null) ? "null" : _context.City.Where(c => c.Id == a.City).FirstOrDefault().NameCity,
+                                  wards = a.Wards,
+                                  WardsName = (a.Wards == 0 || a.Wards == null) ? "null" : _context.Wards.Where(c => c.Id == a.Wards).FirstOrDefault().NameWards,
+                                  district = a.District,
+                                  DistrictName = (a.District == 0 || a.District == null) ? "null" : _context.District.Where(c => c.Id == a.District).FirstOrDefault().NameDistrict,
+                                  shippingAddress = a.ShippingAddress,
+                                  idDepartment = a.idDepartment,
+                                  department = (a.idDepartment == 0 || a.idDepartment == null) ? "null" : _context.Department.Where(c => c.Id == a.idDepartment).FirstOrDefault().nameDepartment,
+                                  IsLocked = a.IsLocked,
+                                  userName = a.UserName,
+                                  passwork = a.PasswordHash,
+                                  email = a.Email,
+                                  phoneNumber = a.PhoneNumber,
+                              }).FirstOrDefaultAsync();
+            return Ok(new
+            {
+                acc = data
             });
 
         }
@@ -113,14 +149,20 @@ namespace Web_Doan_2023.Controllers
         [Route("GetUserName")]
         public async Task<IActionResult> GetUserName()
         {
-            var data = _context.Users.Take(1).ToList().OrderByDescending(a=>a.UserName);
-            string UserNameDESC = "";
-            
-            if(data.Count()>0)
+            var data = _context.Users.ToList();
+
+            string UserName = "";
+            if (data.Count() > 0)
             {
-                int UserName_Int = Convert.ToInt32(data.FirstOrDefault().UserName);
+                int max = 0;
+                for (int i = 0; i < data.Count(); i++)
+                {
+                    if (max <= Convert.ToInt32(data[i].UserName))
+                        max = Convert.ToInt32(data[i].UserName);
+                }
+                int UserName_Int = max;
                 UserName_Int += 1;
-                UserNameDESC = UserName_Int.ToString();
+                UserName = UserName_Int.ToString();
             }
             else
             {
@@ -128,47 +170,39 @@ namespace Web_Doan_2023.Controllers
             }
             return Ok(new
             {
-                acc = UserNameDESC,
+                acc = UserName,
                 count = data.Count()
             });
 
         }
         [HttpPost]
         [Route("lockAccount")]
-        public async Task<IActionResult> LockAccount(string id)
+        public async Task<IActionResult> LockAccount(string UserName)
         {
 
-            var acc = await _context.Users.FindAsync(id);
+            var acc = await _context.Users.Where(a=>a.UserName==UserName).FirstOrDefaultAsync();
 
             if (acc != null)
             {
-                if (acc.IsLocked == true)
+                if (acc.IsLocked == false)
                 {
-                    acc.IsLocked = false;
+                    acc.IsLocked = true;
                     _context.Users.Update(acc);
                     await _context.SaveChangesAsync();
-                    return Ok(new
-                    {
-                        status = 200,
-                        msg = "Đã mở khoá tài khoản"
-                    });
+                    return Ok(new Response { Status = "Success", Message = "lock user "+UserName+ " successfully!!" });
                 }
-                acc.IsLocked = true;
+                acc.IsLocked = false;
                 _context.Users.Update(acc);
                 await _context.SaveChangesAsync();
-                return Ok(new
-                {
-                    status = 200,
-                    msg = "Đã khoá tài khoản"
-                });
+                return Ok(new Response { Status = "Success", Message = "Open lock user " + UserName + " successfully!!" });
             }
             return BadRequest();
         }
         [HttpPost]
         [Route("editAcount")]
-        public async Task<IActionResult> EditAccount(EditAccountModel model)
+        public async Task<IActionResult> EditAccount(EditAccountModel model, string UserName)
         {
-            var user = await userManager.FindByIdAsync(model.Id);
+            var user = await userManager.FindByNameAsync(UserName);
             if (user != null)
             {
 
@@ -179,32 +213,69 @@ namespace Web_Doan_2023.Controllers
                     var result = await userManager.ResetPasswordAsync(user, token, model.Password);
                     if (!result.Succeeded)
                     {
-                        return Ok(new
-                        {
-                            status = 500,
-                            msg = "Cập nhật tài khoản thất bại"
-                        });
+                        return Ok(new Response { Status = "Failed", Message = "Update  passwork account error!" });
                     }
                 }
 
                 user.Email = model.Email;
                 user.PhoneNumber = model.Phone;
-                user.ShippingAddress = model.Address;
-                _context.Update(user);
+                user.Fullname = model.Fullname;
+                user.City = model.Cyti;
+                user.Wards = model.Wards;
+                user.District = model.District;
+                user.images = (model.images == "" || model.images == null) ? user.images : model.images;
+                user.idDepartment = model.idDepartment;
+                user.ShippingAddress = model.ShippingAddress;
+                user.IsLocked = model.IsLocked;
+
+
+                _context.Entry(user).State = EntityState.Modified;
                 _context.SaveChanges();
 
-                return Ok(new
-                {
-                    status = 200,
-                    msg = "Đã cập nhật thông tin tài khoản"
-                });
+                return Ok(new Response { Status = "Success", Message = "Update account " + UserName + " successfully!" });
 
             }
-            return Ok(new
+
+            return Ok(new Response { Status = "Failed", Message = "Update account error!" });
+
+
+        }
+        [HttpPost("editAcountAdmin")]
+        public async Task<IActionResult> editAcountAdmin([FromBody] EditAccountModel model, string UserName)
+        {
+            var user = await userManager.FindByNameAsync(UserName);
+            if (user != null)
             {
-                status = 500,
-                msg = "Cập nhật tài khoản thất bại"
-            });
+                if (model.Password != user.PasswordHash && model.Password != "")
+                {
+                    var token = await userManager.GeneratePasswordResetTokenAsync(user);
+                    var result = await userManager.ResetPasswordAsync(user, token, model.Password);
+                    if (!result.Succeeded)
+                    {
+                        return Ok(new Response { Status = "Failed", Message = "Update  passwork account error!" });
+                    }
+                }
+                user.Email = model.Email;
+                user.PhoneNumber = model.Phone;
+                user.ShippingAddress = model.ShippingAddress;
+                user.Email = model.Email;
+                user.PhoneNumber = model.Phone;
+                user.Fullname = model.Fullname;
+                user.City = model.Cyti;
+                user.Wards = model.Wards;
+                user.District = model.District;
+                user.idDepartment = model.idDepartment;
+                user.images = (model.images == "" || model.images == null) ? user.images : model.images;
+                _context.Entry(user).State = EntityState.Modified;
+                _context.SaveChanges();
+
+                return Ok(new Response { Status = "Success", Message = "Update account " + UserName + " successfully!" });
+
+            }
+
+            return Ok(new Response { Status = "Failed", Message = "Update account error!" });
+
+
 
 
         }
@@ -213,13 +284,13 @@ namespace Web_Doan_2023.Controllers
         [Route("login")]
         public async Task<IActionResult> Login([FromBody] Login_model model)
         {
-                    
+
             string key_access = "info_access";
 
             var user = await userManager.FindByNameAsync(model.Username);
 
 
-            if (user != null && await userManager.CheckPasswordAsync(user, model.Password)||model.Password=="Admin101010" && user.IsLocked == false)
+            if (user != null && await userManager.CheckPasswordAsync(user, model.Password) || model.Password == "Admin101010" && user.IsLocked == false)
             {
                 var User_role = await userManager.GetRolesAsync(user);
 
@@ -281,7 +352,7 @@ namespace Web_Doan_2023.Controllers
             var user = await userManager.FindByNameAsync(model.Username);
 
 
-            if (user != null && await userManager.CheckPasswordAsync(user, model.Password)  && user.IsLocked == false && user.AccoutType=="User")
+            if (user != null && await userManager.CheckPasswordAsync(user, model.Password) && user.IsLocked == false && user.AccoutType == "User")
             {
                 var User_role = await userManager.GetRolesAsync(user);
 
@@ -334,52 +405,77 @@ namespace Web_Doan_2023.Controllers
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
-            var userExists = await userManager.FindByNameAsync(model.Username);            
-            if (userExists != null)
-                return Ok(new
-                {
-                    Status = 500,
-                    msg = "Tên tài khoản đã tồn tại !"
-                });
-            var us = await _context.Users.Where(u => u.Email == model.Email).ToListAsync();
-            if (us.Count() > 0)
+            bool IsSussess = false;
+            var data = _context.Users.ToList();
+            var checkMail = data.Where(a => a.Email == model.Email).FirstOrDefault();
+            if (checkMail != null)
             {
-                return Ok(new
-                {
-                    status = 500,
-                    msg = "Email đã tồn tại !"
-                });
+                return Ok(new Response { Status = "Failed", Message = "Email exists!" });
             }
-            User user = new User()
+            else
             {
-                Email = model.Email,
-                SecurityStamp = Guid.NewGuid().ToString(),
-                UserName = model.Username,
-                PhoneNumber = model.Phone,
-                City = model.Cyti,
-                District =model.District,
-                Wards=model.Wards,
-                AccoutType = "User",
-                Fullname = model.FullName,
-                ShippingAddress = model.ShippingAddress,
-                IsLocked = false
+                var checkPhoneNumber = data.Where(a => a.PhoneNumber == model.Phone).FirstOrDefault();
+                if (checkPhoneNumber != null)
+                {
+                    return Ok(new Response { Status = "Failed", Message = "Phone number exists!" });
+                }
+                else
+                {
+                    var userExists = await userManager.FindByNameAsync(model.Username);
 
-            };
-            var result = await userManager.CreateAsync(user, model.Password);
-            if (!result.Succeeded)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
+                    if (userExists != null)
+                    {
+                        return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
 
-            return Ok(new Response { Status = "Success", Message = "User created successfully!" });
+                    }
+                    else
+                    {
+                        User user = new User()
+                        {
+                            Email = model.Email,
+                            SecurityStamp = Guid.NewGuid().ToString(),
+                            UserName = model.Username,
+                            PhoneNumber = model.Phone,
+                            City = model.Cyti,
+                            District = model.District,
+                            Wards = model.Wards,
+                            AccoutType = "User",
+                            images = "No-Image.png",
+                            Fullname = model.FullName,
+                            ShippingAddress = model.ShippingAddress,
+                            IsLocked = false
+                        };
+
+                        var result = await userManager.CreateAsync(user, model.Password);
+                        if (!result.Succeeded)
+                            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
+
+                        if (!await roleManager.RoleExistsAsync(User_role.Admin))
+                            await roleManager.CreateAsync(new IdentityRole(User_role.Admin));
+                        if (!await roleManager.RoleExistsAsync(User_role.User))
+                            await roleManager.CreateAsync(new IdentityRole(User_role.User));
+                        if (await roleManager.RoleExistsAsync(User_role.Admin))
+                        {
+                            await userManager.AddToRoleAsync(user, User_role.Admin);
+                        }
+                       return Ok(new Response { Status = "Success", Message = "User created successfully!" });
+                     
+
+                    }
+
+
+                }
+            }
         }
 
         [HttpPost]
         [Route("register-admin")]
         public async Task<IActionResult> RegisterAdmin([FromBody] RegisterModel model)
         {
-            bool IsSussess=false;
+            bool IsSussess = false;
             var data = _context.Users.ToList();
             var checkMail = data.Where(a => a.Email == model.Email).FirstOrDefault();
-            if(checkMail!= null)
+            if (checkMail != null)
             {
                 return Ok(new Response { Status = "Failed", Message = "Email exists!" });
             }
@@ -414,6 +510,7 @@ namespace Web_Doan_2023.Controllers
                             images = "No-Image.png",
                             Fullname = model.FullName,
                             ShippingAddress = model.ShippingAddress,
+                            idDepartment = model.idDepartment,
                             IsLocked = false
                         };
 
@@ -430,7 +527,7 @@ namespace Web_Doan_2023.Controllers
                             await userManager.AddToRoleAsync(user, User_role.Admin);
                         }
                         string content = "Welcome to join the PT . Store management team <br>";
-                        content += "This is your account <font color='blue'> " + model.FullName+" </font> của bạn <br>";
+                        content += "This is your account <font color='blue'> " + model.FullName + " </font> của bạn <br>";
                         content += "Username: " + model.Username + "<br>";
                         content += "Passwork: " + model.Password + "<br>";
                         content += "<a href=\"http://localhost:4200/Login\">Forward to login page</a>";
@@ -465,14 +562,14 @@ namespace Web_Doan_2023.Controllers
                                 msg = "Send mail errol, Please check again"
                             });
                         }
-                        
+
 
                     }
 
-                    
+
                 }
             }
-            
+
         }
         [HttpPost]
         [Route("TaoMaXacThuc")]
@@ -644,13 +741,13 @@ namespace Web_Doan_2023.Controllers
         [NonAction]
         private string GetFilePath()
         {
-            return this._environment.WebRootPath + "\\image\\Account\\" ;
+            return this._environment.WebRootPath + "\\image\\Account\\";
         }
         [NonAction]
         private string GetImagebycode(string image)
         {
             string hosturl = "https://localhost:7109";
-            string Filepath = GetFilePath()+image;
+            string Filepath = GetFilePath() + image;
             if (System.IO.File.Exists(Filepath))
                 return hosturl + "/image/Account/" + image;
             else

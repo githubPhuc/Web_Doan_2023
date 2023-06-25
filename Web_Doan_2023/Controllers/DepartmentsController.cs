@@ -14,111 +14,95 @@ namespace Web_Doan_2023.Controllers
     [ApiController]
     public class DepartmentsController : ControllerBase
     {
-        private readonly Web_Doan_2023Context _context;
+        private readonly Web_Doan_2023Context db_;
 
         public DepartmentsController(Web_Doan_2023Context context)
         {
-            _context = context;
+            db_ = context;
         }
-
-        // GET: api/Departments
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Department>>> GetDepartment()
+        [HttpGet("GetList")]
+        public async Task<IActionResult> Get(string? name)
         {
-          if (_context.Department == null)
-          {
-              return NotFound();
-          }
-            return await _context.Department.ToListAsync();
+            var data = await (from a in db_.Department
+                       where a.Status ==true && (name== null||name==""|| a.nameDepartment.ToUpper().Contains(name.ToUpper()))
+                       select a).ToListAsync();
+            return Ok(new
+            {
+                data = data,
+                count = data.Count()
+            });
         }
-
-        // GET: api/Departments/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Department>> GetDepartment(int id)
+        [HttpGet("GetListComboBox")]
+        public async Task<IActionResult> Get()
         {
-          if (_context.Department == null)
-          {
-              return NotFound();
-          }
-            var department = await _context.Department.FindAsync(id);
-
-            if (department == null)
+            var data = await (from a in db_.Department
+                              where a.Status == true
+                              select a).ToListAsync();
+            return Ok(new
             {
-                return NotFound();
-            }
-
-            return department;
+                data = data,
+                count = data.Count()
+            });
         }
-
-        // PUT: api/Departments/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutDepartment(int id, Department department)
+        [HttpPost("Insert")]
+        public async Task<ActionResult> Post(string codeDepartment, string nameDepartment)
         {
-            if (id != department.Id)
+            var check = await db_.Department.Where(a=>a.codeDepartment== codeDepartment).FirstOrDefaultAsync();
+            if (check != null)
             {
-                return BadRequest();
+                return Ok(new Response { Status = "Failed", Message = "Code Department already exist!" });
             }
-
-            _context.Entry(department).State = EntityState.Modified;
-
-            try
+            else
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DepartmentExists(id))
+                try
                 {
-                    return NotFound();
+                    var data = new Department()
+                    {
+                        codeDepartment = codeDepartment,
+                        nameDepartment = nameDepartment,
+                        Status = true
+                    };
+                    db_.Department.Add(data);
+                    db_.SaveChangesAsync();
+                    return Ok(new Response { Status = "Success", Message = "Insert Department " + nameDepartment + " successfully!" });
                 }
-                else
+                catch (Exception ex)
                 {
-                    throw;
+                    return Ok(new Response { Status = "Failed", Message = ex.Message });
                 }
             }
-
-            return NoContent();
         }
-
-        // POST: api/Departments
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Department>> PostDepartment(Department department)
+        [HttpPost("Delete")]
+        public async Task<ActionResult> Delete(int id)
         {
-          if (_context.Department == null)
-          {
-              return Problem("Entity set 'Web_Doan_2023Context.Department'  is null.");
-          }
-            _context.Department.Add(department);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetDepartment", new { id = department.Id }, department);
-        }
-
-        // DELETE: api/Departments/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDepartment(int id)
-        {
-            if (_context.Department == null)
+            var data = await db_.Department.Where(a => a.Id == id).FirstOrDefaultAsync();
+            if (data == null)
             {
-                return NotFound();
+                return Ok(new Response { Status = "Failed", Message = "Department not  exist!" });
             }
-            var department = await _context.Department.FindAsync(id);
-            if (department == null)
+            else
             {
-                return NotFound();
+                try
+                {
+                    var checkUser = db_.Users.Where(a=>a.idDepartment ==id).ToList();
+                    if (checkUser.Count() > 0)
+                    {
+                        return Ok(new Response { Status = "Failed", Message = "The users exists in department!" });
+                    }
+                    db_.Remove(data);
+                    await db_.SaveChangesAsync();
+                    return Ok(new Response { Status = "Success", Message = "Delete Department " + data.nameDepartment + " successfully!" });
+                }
+                catch (Exception ex)
+                {
+                    return Ok(new Response { Status = "Failed", Message = ex.Message });
+                }
             }
-
-            _context.Department.Remove(department);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
 
         private bool DepartmentExists(int id)
         {
-            return (_context.Department?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (db_.Department?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

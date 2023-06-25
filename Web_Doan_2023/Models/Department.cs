@@ -6,7 +6,7 @@
         public string? codeDepartment { get; set; }
         public string? nameDepartment { get; set; }
         public bool Status { get; set; }
-        public List<User> Users { get; set; }
+        public List<User>? Users { get; set; }
 
     }
 }

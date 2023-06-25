@@ -34,37 +34,39 @@ namespace Web_Doan_2023.Controllers
 
         // POST: api/ColorProducts
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<ColorProduct>> PostColorProduct(ColorProduct colorProduct)
+        [HttpPost("insert")]
+        public async Task<ActionResult> insert(ColorProduct colorProduct)
         {
-          if (_context.ColorProduct == null)
-          {
-              return Problem("Entity set 'Web_Doan_2023Context.ColorProduct'  is null.");
-          }
-            _context.ColorProduct.Add(colorProduct);
-            await _context.SaveChangesAsync();// Mai làm check code color Trần Ninh Phuc
-
-            return CreatedAtAction("GetColorProduct", new { id = colorProduct.Id }, colorProduct);
+          var check  = _context.ColorProduct.Where(a=>a.code==colorProduct.code&& a.Name==colorProduct.Name).FirstOrDefault();
+            if (check == null)
+            {
+                var data = new ColorProduct()
+                {
+                    code = colorProduct.code,
+                    Name = colorProduct.Name,
+                };
+                _context.ColorProduct.Add(data);
+                await _context.SaveChangesAsync();
+                return Ok(new Response { Status = "Success", Message = "Insert color product " + colorProduct.Name + " successfully!" });
+            }
+            else { return Ok(new Response { Status = "Failed", Message = "Color is exist!" }); }
         }
 
         // DELETE: api/ColorProducts/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteColorProduct(int id)
+        [HttpPost("Delete")]
+        public async Task<IActionResult> Delete(int id)
         {
-            if (_context.ColorProduct == null)
+            var data = await _context.ColorProduct.Where(a=>a.Id==id).FirstOrDefaultAsync();
+            if(data == null)
             {
-                return NotFound();
+                return Ok(new Response { Status = "Failed", Message = "Not data!" });
             }
-            var colorProduct = await _context.ColorProduct.FindAsync(id);
-            if (colorProduct == null)
+            else
             {
-                return NotFound();
+                _context.ColorProduct.Remove(data);
+                await _context.SaveChangesAsync();
+                return Ok(new Response { Status = "Success", Message = "Delete color successfully!" });
             }
-
-            _context.ColorProduct.Remove(colorProduct);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
 
         private bool ColorProductExists(int id)

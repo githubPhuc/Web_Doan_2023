@@ -76,11 +76,10 @@ namespace Web_Doan_2023.Controllers
                                   Status = a.Status,
                                   logoProducer = a.logoProducer,
                                   pathLogo = "https://localhost:7109/image/Producer/" + a.logoProducer,
-                              }).ToListAsync();
+                              }).FirstOrDefaultAsync();
             return Ok(new
             {
-                acc = data,
-                count = data.Count()
+                acc = data
             });
         }
         [HttpGet("Load_CBX")]
@@ -100,7 +99,7 @@ namespace Web_Doan_2023.Controllers
             });
         }
         [HttpPost("Update")]
-        public async Task<ActionResult> Update([FromForm] Producer model, int id)
+        public async Task<ActionResult> Update([FromBody] Producer model, int id)
         {
             if (model == null)
             {
@@ -203,6 +202,7 @@ namespace Web_Doan_2023.Controllers
                         var data = new Producer()
                         {
                             Phone = model.Phone,
+                            nameProduce=model.nameProduce,
                             codeProduce = model.codeProduce,
                             Email = model.Email,
                             idCity = model.idCity,

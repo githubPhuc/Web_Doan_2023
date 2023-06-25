@@ -3,6 +3,7 @@
     public class CategoryProduct
     {
         public int Id { get; set; } 
+        public string codeCategory { get; set; }
         public string? nameCategory { get; set; }
         public bool? Status { get; set; }
         public List<Product>? Products { get; set; } 

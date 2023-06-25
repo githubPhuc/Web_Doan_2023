@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Web_Doan_2023.Data;
 
@@ -11,9 +12,10 @@ using Web_Doan_2023.Data;
 namespace Web_Doan_2023.Migrations
 {
     [DbContext(typeof(Web_Doan_2023Context))]
-    partial class Web_Doan_2023ContextModelSnapshot : ModelSnapshot
+    [Migration("20230624174357_msr131")]
+    partial class msr131
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -275,10 +277,6 @@ namespace Web_Doan_2023.Migrations
                     b.Property<bool?>("Status")
                         .HasColumnType("bit");
 
-                    b.Property<string>("codeCategory")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("nameCategory")
                         .HasColumnType("nvarchar(max)");
 
@@ -505,7 +503,7 @@ namespace Web_Doan_2023.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("Cyti")
+                    b.Property<int>("City")
                         .HasColumnType("int");
 
                     b.Property<int>("District")
@@ -995,9 +993,6 @@ namespace Web_Doan_2023.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("DepartmentId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("District")
                         .HasColumnType("int");
 
@@ -1060,8 +1055,6 @@ namespace Web_Doan_2023.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DepartmentId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -1225,13 +1218,6 @@ namespace Web_Doan_2023.Migrations
                         .HasForeignKey("productDepotId");
                 });
 
-            modelBuilder.Entity("Web_Doan_2023.Models.User", b =>
-                {
-                    b.HasOne("Web_Doan_2023.Models.Department", null)
-                        .WithMany("Users")
-                        .HasForeignKey("DepartmentId");
-                });
-
             modelBuilder.Entity("Web_Doan_2023.Models.Wards", b =>
                 {
                     b.HasOne("Web_Doan_2023.Models.City", null)
@@ -1258,11 +1244,6 @@ namespace Web_Doan_2023.Migrations
                     b.Navigation("_Districts");
 
                     b.Navigation("_Wards");
-                });
-
-            modelBuilder.Entity("Web_Doan_2023.Models.Department", b =>
-                {
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Web_Doan_2023.Models.District", b =>
