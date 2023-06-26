@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Web_Doan_2023.Data;
 
@@ -11,9 +12,10 @@ using Web_Doan_2023.Data;
 namespace Web_Doan_2023.Migrations
 {
     [DbContext(typeof(Web_Doan_2023Context))]
-    partial class Web_Doan_2023ContextModelSnapshot : ModelSnapshot
+    [Migration("20230625081622_msr34")]
+    partial class msr34
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -810,13 +812,13 @@ namespace Web_Doan_2023.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("AccessoriesIncluded")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("CPUProduct")
+                    b.Property<int?>("AccessoriesIncluded")
                         .HasColumnType("int");
 
-                    b.Property<int>("CardDisplay")
+                    b.Property<int?>("CPUProduct")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CardDisplay")
                         .HasColumnType("int");
 
                     b.Property<int?>("CartProductId")
@@ -825,32 +827,31 @@ namespace Web_Doan_2023.Migrations
                     b.Property<int?>("CategoryProductId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ColorProduct")
+                    b.Property<int?>("ColorProduct")
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("DisplayProduct")
+                    b.Property<int?>("DisplayProduct")
                         .HasColumnType("int");
 
-                    b.Property<bool>("IsDelete")
+                    b.Property<bool?>("IsDelete")
                         .HasColumnType("bit");
 
-                    b.Property<string>("MainProduct")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("MainProduct")
+                        .HasColumnType("int");
 
                     b.Property<int?>("ProducerId")
                         .HasColumnType("int");
 
-                    b.Property<int>("RamProduct")
+                    b.Property<int?>("RamProduct")
                         .HasColumnType("int");
 
-                    b.Property<int>("SSDProduct")
+                    b.Property<int?>("SSDProduct")
                         .HasColumnType("int");
 
-                    b.Property<bool>("Status")
+                    b.Property<bool?>("Status")
                         .HasColumnType("bit");
 
                     b.Property<string>("codeProduct")
@@ -862,14 +863,14 @@ namespace Web_Doan_2023.Migrations
                     b.Property<int>("idProducer")
                         .HasColumnType("int");
 
-                    b.Property<int?>("idSale")
+                    b.Property<int>("idSale")
                         .HasColumnType("int");
 
                     b.Property<string>("nameProduct")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("portConnection")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("portConnection")
+                        .HasColumnType("int");
 
                     b.Property<decimal?>("price")
                         .HasColumnType("decimal(18,2)");

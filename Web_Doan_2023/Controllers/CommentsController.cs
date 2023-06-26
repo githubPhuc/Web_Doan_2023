@@ -60,8 +60,8 @@ namespace Web_Doan_2023.Controllers
             db_.SaveChanges();
             return Ok(new Response { Status = "Success", Message = "Comment successfully!" });
         }
-        [HttpPost]
-        public async Task<ActionResult<Comment>> PostComment([FromBody] Comment comment, int idProduct, string username)
+        [HttpPost("PostComment")]
+        public async Task<ActionResult> PostComment([FromBody] Comment comment, int idProduct, string username)
         {
             int id = 0;
             if (comment.TopLevel == 0)
@@ -113,7 +113,7 @@ namespace Web_Doan_2023.Controllers
         }
 
         // DELETE: api/Comments/5
-        [HttpDelete("{id}")]
+        [HttpPost("Delete")]
         public async Task<IActionResult> DeleteComment(int id,int idproduct,string Username)
         {
             var data = db_.Comment.Where(a => a.id == id).FirstOrDefault();
@@ -136,8 +136,6 @@ namespace Web_Doan_2023.Controllers
                 {
                     return Ok(new Response { Status = "Failed", Message = "Delete comment failed!" });
                 }
-                
-
             }
             
         }

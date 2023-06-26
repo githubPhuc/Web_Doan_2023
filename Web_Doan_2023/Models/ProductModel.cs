@@ -1,8 +1,10 @@
-﻿namespace Web_Doan_2023.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Web_Doan_2023.Models
 {
-    public class Product
+    [NotMapped]
+    public class ProductModel
     {
-        public int Id { get; set; }
         public string? codeProduct { get; set; }// Mã sản phẩm
         public string? nameProduct { get; set; }
         public string? Description { get; set; } // sự miêu tả
@@ -15,13 +17,11 @@
         public string MainProduct { get; set; }
         public int DisplayProduct { get; set; }
         public int ColorProduct { get; set; }
-        public string? portConnection { get;set; }
+        public string? portConnection { get; set; }
         public int CardDisplay { get; set; }
         public string? AccessoriesIncluded { get; set; }// Phụ kiện đi kèm
         public bool Status { get; set; }
         public int? idSale { get; set; }
         public bool IsDelete { get; set; }
-        public List<Images>? images { get; set; }
-
     }
 }

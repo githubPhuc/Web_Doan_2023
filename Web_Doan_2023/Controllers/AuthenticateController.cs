@@ -119,7 +119,7 @@ namespace Web_Doan_2023.Controllers
                                        (Fullname == null || Fullname == "" || a.Fullname.Contains(Fullname)) &&
                                        (UserName == null || UserName == "" || a.UserName.Contains(UserName)) &&
                                        (Email == null || Email == "" || a.Email.Contains(Email)) &&
-                                       a.AccoutType == "Admin"
+                                       a.AccoutType == "User"
                                     )
                               select new
                               {
