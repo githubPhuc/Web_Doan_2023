@@ -15,7 +15,7 @@
         public string MainProduct { get; set; }
         public int DisplayProduct { get; set; }
         public int ColorProduct { get; set; }
-        public string? portConnection { get;set; }
+        public string portConnection { get;set; }
         public int CardDisplay { get; set; }
         public string? AccessoriesIncluded { get; set; }// Phụ kiện đi kèm
         public bool Status { get; set; }

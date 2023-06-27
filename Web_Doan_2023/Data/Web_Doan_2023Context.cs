@@ -43,5 +43,6 @@ namespace Web_Doan_2023.Data
         public DbSet<Web_Doan_2023.Models.PortConnection>? PortConnection { get; set; }
         public DbSet<Web_Doan_2023.Models.Comment>? Comment { get; set; }
         public DbSet<Web_Doan_2023.Models.CommentProduct>? CommentProduct { get; set; }
+        public DbSet<Web_Doan_2023.Models.ProductSale>? ProductSale { get; set; }
     }
 }

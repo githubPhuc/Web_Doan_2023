@@ -14,111 +14,22 @@ namespace Web_Doan_2023.Controllers
     [ApiController]
     public class SalesController : ControllerBase
     {
-        private readonly Web_Doan_2023Context _context;
+        private readonly Web_Doan_2023Context db_;
 
         public SalesController(Web_Doan_2023Context context)
         {
-            _context = context;
+            db_ = context;
         }
-
-        // GET: api/Sales
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Sale>>> GetSale()
+        [HttpGet("GetList")]
+        public async Task<ActionResult> GetList()
         {
-          if (_context.Sale == null)
-          {
-              return NotFound();
-          }
-            return await _context.Sale.ToListAsync();
-        }
-
-        // GET: api/Sales/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Sale>> GetSale(int id)
-        {
-          if (_context.Sale == null)
-          {
-              return NotFound();
-          }
-            var sale = await _context.Sale.FindAsync(id);
-
-            if (sale == null)
+            var data = db_.Sale.ToList();
+            return Ok(new
             {
-                return NotFound();
-            }
-
-            return sale;
+                data = data,
+                count = data.Count()
+            });
         }
-
-        // PUT: api/Sales/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutSale(int id, Sale sale)
-        {
-            if (id != sale.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(sale).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!SaleExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Sales
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Sale>> PostSale(Sale sale)
-        {
-          if (_context.Sale == null)
-          {
-              return Problem("Entity set 'Web_Doan_2023Context.Sale'  is null.");
-          }
-            _context.Sale.Add(sale);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetSale", new { id = sale.Id }, sale);
-        }
-
-        // DELETE: api/Sales/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteSale(int id)
-        {
-            if (_context.Sale == null)
-            {
-                return NotFound();
-            }
-            var sale = await _context.Sale.FindAsync(id);
-            if (sale == null)
-            {
-                return NotFound();
-            }
-
-            _context.Sale.Remove(sale);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool SaleExists(int id)
-        {
-            return (_context.Sale?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
+        
     }
 }

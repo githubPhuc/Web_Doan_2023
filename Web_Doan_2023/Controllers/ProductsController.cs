@@ -17,58 +17,112 @@ namespace Web_Doan_2023.Controllers
             _environment = environment;
         }
 
+        //// GET: api/Products
+        //[HttpGet("GetList")]
+        //public async Task<ActionResult> GetList(string? nameProduct, string? nameProduce, string? nameRam, string? nameCpu,string?nameDisplay,string? nameColor,string? nameCard)
+        //{
+        //    var data = (from a in db_.Product
+        //                  join b in db_.Producer on a.idProducer equals b.Id
+        //                  join CATE in  db_.CategoryProduct on a.idCategory equals CATE.Id
+        //                  join Ram in db_.RamProduct on a.RamProduct equals Ram.Id
+        //                  join Ssd in db_.SsdProduct on a.SSDProduct equals Ssd.Id
+        //                  join Cpu in db_.CpuProduct on a.CPUProduct equals Cpu.Id
+        //                  join Display in db_.CpuProduct on a.DisplayProduct equals Display.Id
+        //                  join Color in db_.ColorProduct on a.DisplayProduct equals Color.Id
+        //                  join Card in db_.CardDisplay on a.CardDisplay equals Card.Id
+        //                  where a.IsDelete == false &&
+        //                  (nameProduct==""||nameProduct==null||a.nameProduct.ToUpper().Contains(nameProduct.ToUpper()))&&
+        //                  (nameProduce == ""|| nameProduce == null||b.nameProduce.ToUpper().Contains(nameProduce.ToUpper()))&&
+        //                  (nameRam == ""|| nameRam == null||Ram.nameRam.ToUpper().Contains(nameRam.ToUpper()))&&
+        //                  (nameCpu == ""|| nameCpu == null||Cpu.Name.ToUpper().Contains(nameCpu.ToUpper()))&&
+        //                  (nameDisplay == ""|| nameDisplay == null||Display.Name.ToUpper().Contains(nameDisplay.ToUpper()))&&
+        //                  (nameColor == ""|| nameColor == null|| Color.Name.ToUpper().Contains(nameColor.ToUpper()))&&
+        //                  (nameCard == ""|| nameCard == null|| Card.Name.ToUpper().Contains(nameCard.ToUpper()))
+
+        //                  select new
+        //                  {
+        //                      Id = a.Id,
+        //                      codeproduct = a.codeProduct,
+        //                      nameproduct = a.nameProduct,
+        //                      Descriptionproduct = a.Description,
+        //                      idCategory=a.idCategory,
+        //                      nameCategory = CATE.nameCategory,
+        //                      idProducer = a.idProducer,
+        //                      nameProduce = b.nameProduce,
+        //                      price= a.price,
+        //                      RamProduct = a.RamProduct,
+        //                      RamName = Ram.nameRam,
+        //                      SSDProduct = a.SSDProduct,
+        //                      SSDName = Ssd.Name,
+        //                      CPUProduct = a.CPUProduct,
+        //                      CPUName = Cpu.Name,
+        //                      DisplayProduct = a.DisplayProduct,
+        //                      DisplayName = Display.Name,
+        //                      ColorProduct = a.ColorProduct,
+        //                      ColorName = Color.Name,
+        //                      portConnection = a.portConnection,
+        //                      CardDisplay = a.CardDisplay,
+        //                      CardDisplayName = Card.Name,
+        //                      mainboar = a.MainProduct,
+        //                      AccessoriesIncluded =a.AccessoriesIncluded,
+        //                      Status=a.Status,
+        //                      idSale=a.idSale,
+        //                      IsDelete=a.IsDelete,
+        //                  }).ToArray();
+        //    return Ok(new
+        //    {
+        //        data = data,
+        //        count = data.Count()
+        //    });
+        //}
         // GET: api/Products
         [HttpGet("GetList")]
-        public async Task<ActionResult> GetList(string? nameProduct, string? nameProduce, string? nameRam, string? nameCpu,string?nameDisplay,string? nameColor,string? nameCard)
+        public async Task<ActionResult> GetList(string? nameProduct, string? nameProduce, string? nameRam, string? nameCpu, string? nameDisplay, string? nameColor, string? nameCard)
         {
-            var data = (from a in db_.Product
-                          join b in db_.Producer on a.idProducer equals b.Id
-                          join CATE in  db_.CategoryProduct on a.idCategory equals CATE.Id
-                          join Ram in db_.RamProduct on a.RamProduct equals Ram.Id
-                          join Ssd in db_.SsdProduct on a.SSDProduct equals Ssd.Id
-                          join Cpu in db_.CpuProduct on a.CPUProduct equals Cpu.Id
-                          join Display in db_.CpuProduct on a.DisplayProduct equals Display.Id
-                          join Color in db_.ColorProduct on a.DisplayProduct equals Color.Id
-                          join Card in db_.CardDisplay on a.CardDisplay equals Card.Id
-                          where a.IsDelete == false &&
-                          (nameProduct==""||nameProduct==null||a.nameProduct.ToUpper().Contains(nameProduct.ToUpper()))&&
-                          (nameProduce == ""|| nameProduce == null||b.nameProduce.ToUpper().Contains(nameProduce.ToUpper()))&&
-                          (nameRam == ""|| nameRam == null||Ram.nameRam.ToUpper().Contains(nameRam.ToUpper()))&&
-                          (nameCpu == ""|| nameCpu == null||Cpu.Name.ToUpper().Contains(nameCpu.ToUpper()))&&
-                          (nameDisplay == ""|| nameDisplay == null||Display.Name.ToUpper().Contains(nameDisplay.ToUpper()))&&
-                          (nameColor == ""|| nameColor == null|| Color.Name.ToUpper().Contains(nameColor.ToUpper()))&&
-                          (nameCard == ""|| nameCard == null|| Card.Name.ToUpper().Contains(nameCard.ToUpper()))
+            var list = (from a in db_.Product
+                        where a.IsDelete == false 
+                        select new
+                        {
+                            Id = a.Id,
+                            codeproduct = a.codeProduct,
+                            nameproduct = a.nameProduct,
+                            Descriptionproduct = a.Description,
+                            idCategory = a.idCategory,
+                            nameCategory = (a.idCategory == 0 || a.idCategory == null) ? "null" : db_.CategoryProduct.Where(c => c.Id == a.idCategory).FirstOrDefault().nameCategory,
+                            idProducer = a.idProducer,
+                            nameProduce = (a.idProducer == 0 || a.idProducer == null) ? "null" : db_.Producer.Where(c => c.Id == a.idProducer).FirstOrDefault().nameProduce,
+                            price = a.price,
+                            RamProduct = a.RamProduct,
+                            RamName = (a.RamProduct == 0 || a.RamProduct == null) ? "null" : db_.RamProduct.Where(c => c.Id == a.RamProduct).FirstOrDefault().nameRam,
+                            SSDProduct = a.SSDProduct,
+                            SSDName = (a.SSDProduct == 0 || a.SSDProduct == null) ? "null" : db_.SsdProduct.Where(c => c.Id == a.SSDProduct).FirstOrDefault().Name,
+                            CPUProduct = a.CPUProduct,
+                            CPUName = (a.CPUProduct == 0 || a.CPUProduct == null) ? "null" : db_.CpuProduct.Where(c => c.Id == a.CPUProduct).FirstOrDefault().Name,
+                            DisplayProduct = a.DisplayProduct,
+                            DisplayName = (a.DisplayProduct == 0 || a.DisplayProduct == null) ? "null" : db_.DisplayProduct.Where(c => c.Id == a.DisplayProduct).FirstOrDefault().Name,
+                            ColorProduct = a.ColorProduct,
+                            ColorName = (a.ColorProduct == 0 || a.ColorProduct == null) ? "null" : db_.ColorProduct.Where(c => c.Id == a.ColorProduct).FirstOrDefault().Name,
+                            portConnection = a.portConnection,
+                            CardDisplay = a.CardDisplay,
+                            CardDisplayName = (a.CardDisplay == 0 || a.CardDisplay == null) ? "null" : db_.CardDisplay.Where(c => c.Id == a.CardDisplay).FirstOrDefault().Name,
+                            mainboar = a.MainProduct,
+                            AccessoriesIncluded = a.AccessoriesIncluded,
+                            Status = a.Status,
+                            idSale = a.idSale,
+                            IsDelete = a.IsDelete,
+                        }).ToArray();
 
-                          select new
-                          {
-                              Id = a.Id,
-                              codeproduct = a.codeProduct,
-                              nameproduct = a.nameProduct,
-                              Descriptionproduct = a.Description,
-                              idCategory=a.idCategory,
-                              nameCategory = CATE.nameCategory,
-                              idProducer = a.idProducer,
-                              nameProduce = b.nameProduce,
-                              price= a.price,
-                              RamProduct = a.RamProduct,
-                              RamName = Ram.nameRam,
-                              SSDProduct = a.SSDProduct,
-                              SSDName = Ssd.Name,
-                              CPUProduct = a.CPUProduct,
-                              CPUName = Cpu.Name,
-                              DisplayProduct = a.DisplayProduct,
-                              DisplayName = Display.Name,
-                              ColorProduct = a.ColorProduct,
-                              ColorName = Color.Name,
-                              portConnection = a.portConnection,
-                              CardDisplay = a.CardDisplay,
-                              CardDisplayName = Card.Name,
-                              mainboar = a.MainProduct,
-                              AccessoriesIncluded =a.AccessoriesIncluded,
-                              Status=a.Status,
-                              idSale=a.idSale,
-                              IsDelete=a.IsDelete,
-                          }).ToArray();
+            var data = list.Where(a => (
+                                (nameProduct == "" || nameProduct == null || a.nameproduct.ToUpper().Contains(nameProduct.ToUpper())) &&
+                                (nameProduce == "" || nameProduce == null || a.nameProduce.ToUpper().Contains(nameProduce.ToUpper())) &&
+                                (nameRam == "" || nameRam == null || a.RamName.ToUpper().Contains(nameRam.ToUpper())) &&
+                                (nameCpu == "" || nameCpu == null || a.CPUName.ToUpper().Contains(nameCpu.ToUpper())) &&
+                                (nameDisplay == "" || nameDisplay == null || a.DisplayName.ToUpper().Contains(nameDisplay.ToUpper())) &&
+                                (nameColor == "" || nameColor == null || a.ColorName.ToUpper().Contains(nameColor.ToUpper())) &&
+                                (nameCard == "" || nameCard == null || a.CardDisplayName.ToUpper().Contains(nameCard.ToUpper()))
+
+            )
+            ).ToList();
             return Ok(new
             {
                 data = data,
@@ -271,7 +325,7 @@ namespace Web_Doan_2023.Controllers
                         price = Convert.ToDecimal(model.price),
                         SSDProduct = model.SSDProduct,
                         CPUProduct = model.CPUProduct,
-                        MainProduct = model.MainProduct,
+                        MainProduct = model.MainProduct,//
                         DisplayProduct = model.DisplayProduct,
                         ColorProduct = model.ColorProduct,
                         portConnection = model.portConnection,
