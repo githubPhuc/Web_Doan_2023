@@ -17,65 +17,7 @@ namespace Web_Doan_2023.Controllers
             _environment = environment;
         }
 
-        //// GET: api/Products
-        //[HttpGet("GetList")]
-        //public async Task<ActionResult> GetList(string? nameProduct, string? nameProduce, string? nameRam, string? nameCpu,string?nameDisplay,string? nameColor,string? nameCard)
-        //{
-        //    var data = (from a in db_.Product
-        //                  join b in db_.Producer on a.idProducer equals b.Id
-        //                  join CATE in  db_.CategoryProduct on a.idCategory equals CATE.Id
-        //                  join Ram in db_.RamProduct on a.RamProduct equals Ram.Id
-        //                  join Ssd in db_.SsdProduct on a.SSDProduct equals Ssd.Id
-        //                  join Cpu in db_.CpuProduct on a.CPUProduct equals Cpu.Id
-        //                  join Display in db_.CpuProduct on a.DisplayProduct equals Display.Id
-        //                  join Color in db_.ColorProduct on a.DisplayProduct equals Color.Id
-        //                  join Card in db_.CardDisplay on a.CardDisplay equals Card.Id
-        //                  where a.IsDelete == false &&
-        //                  (nameProduct==""||nameProduct==null||a.nameProduct.ToUpper().Contains(nameProduct.ToUpper()))&&
-        //                  (nameProduce == ""|| nameProduce == null||b.nameProduce.ToUpper().Contains(nameProduce.ToUpper()))&&
-        //                  (nameRam == ""|| nameRam == null||Ram.nameRam.ToUpper().Contains(nameRam.ToUpper()))&&
-        //                  (nameCpu == ""|| nameCpu == null||Cpu.Name.ToUpper().Contains(nameCpu.ToUpper()))&&
-        //                  (nameDisplay == ""|| nameDisplay == null||Display.Name.ToUpper().Contains(nameDisplay.ToUpper()))&&
-        //                  (nameColor == ""|| nameColor == null|| Color.Name.ToUpper().Contains(nameColor.ToUpper()))&&
-        //                  (nameCard == ""|| nameCard == null|| Card.Name.ToUpper().Contains(nameCard.ToUpper()))
-
-        //                  select new
-        //                  {
-        //                      Id = a.Id,
-        //                      codeproduct = a.codeProduct,
-        //                      nameproduct = a.nameProduct,
-        //                      Descriptionproduct = a.Description,
-        //                      idCategory=a.idCategory,
-        //                      nameCategory = CATE.nameCategory,
-        //                      idProducer = a.idProducer,
-        //                      nameProduce = b.nameProduce,
-        //                      price= a.price,
-        //                      RamProduct = a.RamProduct,
-        //                      RamName = Ram.nameRam,
-        //                      SSDProduct = a.SSDProduct,
-        //                      SSDName = Ssd.Name,
-        //                      CPUProduct = a.CPUProduct,
-        //                      CPUName = Cpu.Name,
-        //                      DisplayProduct = a.DisplayProduct,
-        //                      DisplayName = Display.Name,
-        //                      ColorProduct = a.ColorProduct,
-        //                      ColorName = Color.Name,
-        //                      portConnection = a.portConnection,
-        //                      CardDisplay = a.CardDisplay,
-        //                      CardDisplayName = Card.Name,
-        //                      mainboar = a.MainProduct,
-        //                      AccessoriesIncluded =a.AccessoriesIncluded,
-        //                      Status=a.Status,
-        //                      idSale=a.idSale,
-        //                      IsDelete=a.IsDelete,
-        //                  }).ToArray();
-        //    return Ok(new
-        //    {
-        //        data = data,
-        //        count = data.Count()
-        //    });
-        //}
-        // GET: api/Products
+       
         [HttpGet("GetList")]
         public async Task<ActionResult> GetList(string? nameProduct, string? nameProduce, string? nameRam, string? nameCpu, string? nameDisplay, string? nameColor, string? nameCard)
         {
@@ -135,16 +77,18 @@ namespace Web_Doan_2023.Controllers
         public async Task<ActionResult> GetProductById(int id)
         {
             var data = (from a in db_.Product
-                        join b in db_.Producer on a.idProducer equals b.Id
-                        join CATE in db_.CategoryProduct on a.idCategory equals CATE.Id
-                        join Ram in db_.RamProduct on a.RamProduct equals Ram.Id
-                        join Ssd in db_.SsdProduct on a.SSDProduct equals Ssd.Id
-                        join Cpu in db_.CpuProduct on a.CPUProduct equals Cpu.Id
-                        join Display in db_.CpuProduct on a.DisplayProduct equals Display.Id
-                        join Color in db_.ColorProduct on a.DisplayProduct equals Color.Id
-                        join Card in db_.CardDisplay on a.CardDisplay equals Card.Id
-                        where a.IsDelete == false &&
-                                a.Id==id 
+                        where a.IsDelete== false&& a.Id==id
+                        select a).FirstOrDefault();
+            return Ok(new
+            {
+                data = data
+            });
+        }
+        [HttpGet("GetProductOnIdDetail")]
+        public async Task<ActionResult> GetProductOnIdDetail(int id)
+        {
+            var data = (from a in db_.Product
+                        where a.IsDelete == false && a.Id == id
                         select new
                         {
                             Id = a.Id,
@@ -152,49 +96,41 @@ namespace Web_Doan_2023.Controllers
                             nameproduct = a.nameProduct,
                             Descriptionproduct = a.Description,
                             idCategory = a.idCategory,
-                            nameCategory = CATE.nameCategory,
+                            nameCategory = (a.idCategory == 0 || a.idCategory == null) ? "null" : db_.CategoryProduct.Where(c => c.Id == a.idCategory).FirstOrDefault().nameCategory,
                             idProducer = a.idProducer,
-                            nameProduce = b.nameProduce,
+                            nameProduce = (a.idProducer == 0 || a.idProducer == null) ? "null" : db_.Producer.Where(c => c.Id == a.idProducer).FirstOrDefault().nameProduce,
                             price = a.price,
                             RamProduct = a.RamProduct,
-                            RamName = Ram.nameRam,
+                            RamName = (a.RamProduct == 0 || a.RamProduct == null) ? "null" : db_.RamProduct.Where(c => c.Id == a.RamProduct).FirstOrDefault().nameRam,
                             SSDProduct = a.SSDProduct,
-                            SSDName = Ssd.Name,
+                            SSDName = (a.SSDProduct == 0 || a.SSDProduct == null) ? "null" : db_.SsdProduct.Where(c => c.Id == a.SSDProduct).FirstOrDefault().Name,
                             CPUProduct = a.CPUProduct,
-                            CPUName = Cpu.Name,
+                            CPUName = (a.CPUProduct == 0 || a.CPUProduct == null) ? "null" : db_.CpuProduct.Where(c => c.Id == a.CPUProduct).FirstOrDefault().Name,
                             DisplayProduct = a.DisplayProduct,
-                            DisplayName = Display.Name,
+                            DisplayName = (a.DisplayProduct == 0 || a.DisplayProduct == null) ? "null" : db_.DisplayProduct.Where(c => c.Id == a.DisplayProduct).FirstOrDefault().Name,
                             ColorProduct = a.ColorProduct,
-                            ColorName = Color.Name,
+                            ColorName = (a.ColorProduct == 0 || a.ColorProduct == null) ? "null" : db_.ColorProduct.Where(c => c.Id == a.ColorProduct).FirstOrDefault().Name,
                             portConnection = a.portConnection,
                             CardDisplay = a.CardDisplay,
-                            CardDisplayName = Card.Name,
+                            CardDisplayName = (a.CardDisplay == 0 || a.CardDisplay == null) ? "null" : db_.CardDisplay.Where(c => c.Id == a.CardDisplay).FirstOrDefault().Name,
                             mainboar = a.MainProduct,
                             AccessoriesIncluded = a.AccessoriesIncluded,
                             Status = a.Status,
                             idSale = a.idSale,
                             IsDelete = a.IsDelete,
-                        }).ToArray();
+                        }).FirstOrDefault();
+
+
             return Ok(new
             {
-                data = data,
-                count = data.Count()
+                data = data
             });
         }
         [HttpGet("GetProductOnCategory")]
-        public async Task<ActionResult<Product>> GetProductOnCategory(int id)
+        public async Task<ActionResult> GetProductOnCategory(int id)
         {
             var data = (from a in db_.Product
-                        join b in db_.Producer on a.idProducer equals b.Id
-                        join CATE in db_.CategoryProduct on a.idCategory equals CATE.Id
-                        join Ram in db_.RamProduct on a.RamProduct equals Ram.Id
-                        join Ssd in db_.SsdProduct on a.SSDProduct equals Ssd.Id
-                        join Cpu in db_.CpuProduct on a.CPUProduct equals Cpu.Id
-                        join Display in db_.CpuProduct on a.DisplayProduct equals Display.Id
-                        join Color in db_.ColorProduct on a.DisplayProduct equals Color.Id
-                        join Card in db_.CardDisplay on a.CardDisplay equals Card.Id
                         where a.IsDelete == false && a.idCategory == id
-                       
                         select new
                         {
                             Id = a.Id,
@@ -202,29 +138,31 @@ namespace Web_Doan_2023.Controllers
                             nameproduct = a.nameProduct,
                             Descriptionproduct = a.Description,
                             idCategory = a.idCategory,
-                            nameCategory = CATE.nameCategory,
+                            nameCategory = (a.idCategory == 0 || a.idCategory == null) ? "null" : db_.CategoryProduct.Where(c => c.Id == a.idCategory).FirstOrDefault().nameCategory,
                             idProducer = a.idProducer,
-                            nameProduce = b.nameProduce,
+                            nameProduce = (a.idProducer == 0 || a.idProducer == null) ? "null" : db_.Producer.Where(c => c.Id == a.idProducer).FirstOrDefault().nameProduce,
                             price = a.price,
                             RamProduct = a.RamProduct,
-                            RamName = Ram.nameRam,
+                            RamName = (a.RamProduct == 0 || a.RamProduct == null) ? "null" : db_.RamProduct.Where(c => c.Id == a.RamProduct).FirstOrDefault().nameRam,
                             SSDProduct = a.SSDProduct,
-                            SSDName = Ssd.Name,
+                            SSDName = (a.SSDProduct == 0 || a.SSDProduct == null) ? "null" : db_.SsdProduct.Where(c => c.Id == a.SSDProduct).FirstOrDefault().Name,
                             CPUProduct = a.CPUProduct,
-                            CPUName = Cpu.Name,
+                            CPUName = (a.CPUProduct == 0 || a.CPUProduct == null) ? "null" : db_.CpuProduct.Where(c => c.Id == a.CPUProduct).FirstOrDefault().Name,
                             DisplayProduct = a.DisplayProduct,
-                            DisplayName = Display.Name,
+                            DisplayName = (a.DisplayProduct == 0 || a.DisplayProduct == null) ? "null" : db_.DisplayProduct.Where(c => c.Id == a.DisplayProduct).FirstOrDefault().Name,
                             ColorProduct = a.ColorProduct,
-                            ColorName = Color.Name,
+                            ColorName = (a.ColorProduct == 0 || a.ColorProduct == null) ? "null" : db_.ColorProduct.Where(c => c.Id == a.ColorProduct).FirstOrDefault().Name,
                             portConnection = a.portConnection,
                             CardDisplay = a.CardDisplay,
-                            CardDisplayName = Card.Name,
+                            CardDisplayName = (a.CardDisplay == 0 || a.CardDisplay == null) ? "null" : db_.CardDisplay.Where(c => c.Id == a.CardDisplay).FirstOrDefault().Name,
                             mainboar = a.MainProduct,
                             AccessoriesIncluded = a.AccessoriesIncluded,
                             Status = a.Status,
                             idSale = a.idSale,
                             IsDelete = a.IsDelete,
-                        }).ToArray();
+                        }).ToList();
+
+            
             return Ok(new
             {
                 data = data,
@@ -235,16 +173,7 @@ namespace Web_Doan_2023.Controllers
         public async Task<ActionResult<Product>> GetProductOnProducer(int id)
         {
             var data = (from a in db_.Product
-                        join b in db_.Producer on a.idProducer equals b.Id
-                        join CATE in db_.CategoryProduct on a.idCategory equals CATE.Id
-                        join Ram in db_.RamProduct on a.RamProduct equals Ram.Id
-                        join Ssd in db_.SsdProduct on a.SSDProduct equals Ssd.Id
-                        join Cpu in db_.CpuProduct on a.CPUProduct equals Cpu.Id
-                        join Display in db_.CpuProduct on a.DisplayProduct equals Display.Id
-                        join Color in db_.ColorProduct on a.DisplayProduct equals Color.Id
-                        join Card in db_.CardDisplay on a.CardDisplay equals Card.Id
                         where a.IsDelete == false && a.idProducer == id
-
                         select new
                         {
                             Id = a.Id,
@@ -252,29 +181,31 @@ namespace Web_Doan_2023.Controllers
                             nameproduct = a.nameProduct,
                             Descriptionproduct = a.Description,
                             idCategory = a.idCategory,
-                            nameCategory = CATE.nameCategory,
+                            nameCategory = (a.idCategory == 0 || a.idCategory == null) ? "null" : db_.CategoryProduct.Where(c => c.Id == a.idCategory).FirstOrDefault().nameCategory,
                             idProducer = a.idProducer,
-                            nameProduce = b.nameProduce,
+                            nameProduce = (a.idProducer == 0 || a.idProducer == null) ? "null" : db_.Producer.Where(c => c.Id == a.idProducer).FirstOrDefault().nameProduce,
                             price = a.price,
                             RamProduct = a.RamProduct,
-                            RamName = Ram.nameRam,
+                            RamName = (a.RamProduct == 0 || a.RamProduct == null) ? "null" : db_.RamProduct.Where(c => c.Id == a.RamProduct).FirstOrDefault().nameRam,
                             SSDProduct = a.SSDProduct,
-                            SSDName = Ssd.Name,
+                            SSDName = (a.SSDProduct == 0 || a.SSDProduct == null) ? "null" : db_.SsdProduct.Where(c => c.Id == a.SSDProduct).FirstOrDefault().Name,
                             CPUProduct = a.CPUProduct,
-                            CPUName = Cpu.Name,
+                            CPUName = (a.CPUProduct == 0 || a.CPUProduct == null) ? "null" : db_.CpuProduct.Where(c => c.Id == a.CPUProduct).FirstOrDefault().Name,
                             DisplayProduct = a.DisplayProduct,
-                            DisplayName = Display.Name,
+                            DisplayName = (a.DisplayProduct == 0 || a.DisplayProduct == null) ? "null" : db_.DisplayProduct.Where(c => c.Id == a.DisplayProduct).FirstOrDefault().Name,
                             ColorProduct = a.ColorProduct,
-                            ColorName = Color.Name,
+                            ColorName = (a.ColorProduct == 0 || a.ColorProduct == null) ? "null" : db_.ColorProduct.Where(c => c.Id == a.ColorProduct).FirstOrDefault().Name,
                             portConnection = a.portConnection,
                             CardDisplay = a.CardDisplay,
-                            CardDisplayName = Card.Name,
-                            mainboar=a.MainProduct,
+                            CardDisplayName = (a.CardDisplay == 0 || a.CardDisplay == null) ? "null" : db_.CardDisplay.Where(c => c.Id == a.CardDisplay).FirstOrDefault().Name,
+                            mainboar = a.MainProduct,
                             AccessoriesIncluded = a.AccessoriesIncluded,
                             Status = a.Status,
                             idSale = a.idSale,
                             IsDelete = a.IsDelete,
-                        }).ToArray();
+                        }).ToList();
+
+
             return Ok(new
             {
                 data = data,
@@ -348,7 +279,7 @@ namespace Web_Doan_2023.Controllers
             }
         }
         [HttpPost("Update")]
-        public async Task<ActionResult<Product>> Update([FromBody] ProductModel model)
+        public async Task<ActionResult> Update([FromBody] ProductModel model, int id)
         {
             // Mã sản phẩm  gồm( Loại - Nhà sản xuất - màu -id sản phẩm)
             string codeproduct = "";
@@ -365,9 +296,9 @@ namespace Web_Doan_2023.Controllers
             var dataCol = db_.ColorProduct.Where(a => a.Id == model.ColorProduct).FirstOrDefault();
             if (dataCol != null)
             {
-                codeproduct += dataCol.code + "-";
+                codeproduct += dataCol.code;
             }
-            if (codeproduct.Length != 9)
+            if (codeproduct.Length != 11)
             {
                 return Ok(new Response { Status = "Failed", Message = "failed to initialize item code! " + codeproduct });
             }
@@ -375,29 +306,25 @@ namespace Web_Doan_2023.Controllers
             {
                 try
                 {
-                    //Chuwa lafm saong
-                    var data = new Product()
-                    {
-                        codeProduct = codeproduct,
-                        nameProduct = model.nameProduct,
-                        Description = model.Description,
-                        idCategory = model.idCategory,
-                        idProducer = model.idProducer,
-                        RamProduct = model.RamProduct,
-                        price = Convert.ToDecimal(model.price),
-                        SSDProduct = model.SSDProduct,
-                        CPUProduct = model.CPUProduct,
-                        MainProduct = model.MainProduct,
-                        DisplayProduct = model.DisplayProduct,
-                        ColorProduct = model.ColorProduct,
-                        portConnection = model.portConnection,
-                        CardDisplay = model.CardDisplay,
-                        AccessoriesIncluded = model.AccessoriesIncluded,
-                        Status = true,
-                        idSale = model.idSale,
-                        IsDelete = false,
-
-                    };
+                    var data = db_.Product.Where(a => a.Id == id).FirstOrDefault();
+                    data.codeProduct = codeproduct;
+                    data.nameProduct = model.nameProduct;
+                    data.Description = model.Description;
+                    data.idCategory = model.idCategory;
+                    data.idProducer = model.idProducer;
+                    data.RamProduct = model.RamProduct;
+                    data.price = Convert.ToDecimal(model.price);
+                    data.SSDProduct = model.SSDProduct;
+                    data.CPUProduct = model.CPUProduct;
+                    data.MainProduct = model.MainProduct;
+                    data.DisplayProduct = model.DisplayProduct;
+                    data.ColorProduct = model.ColorProduct;
+                    data.portConnection = model.portConnection;
+                    data.CardDisplay = model.CardDisplay;
+                    data.AccessoriesIncluded = model.AccessoriesIncluded;
+                    data.Status = true;
+                    data.idSale = model.idSale;
+                    data.IsDelete = false;
                     db_.Entry(data).State = EntityState.Modified;
                     await db_.SaveChangesAsync();
                     return Ok(new Response { Status = "Success", Message = "Update product " + model.nameProduct + " successfully!" });
@@ -483,21 +410,24 @@ namespace Web_Doan_2023.Controllers
                 return Ok(ex);
             }
         }
-       
+
         // DELETE: api/Products/5
-        [HttpDelete("{id}")]
+        [HttpPost("DeleteProduct")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
             var dataProduct = db_.Product.FirstOrDefault(a => a.Id == id);
             if (dataProduct == null)
             {
-                return Ok(new Response { Status = "500", Message = "Entity set 'Web_Doan_2023Context.Product'  is null.!" });
+                return Ok(new Response { Status = "Failed", Message = "Product is null!" });
             }
-            dataProduct.IsDelete= true;
-            db_.Entry(dataProduct).State = EntityState.Modified;
-            await db_.SaveChangesAsync();
-
-            return NoContent();
+            else
+            {
+                dataProduct.IsDelete = true;
+                db_.Entry(dataProduct).State = EntityState.Modified;
+                await db_.SaveChangesAsync();
+                return Ok(new Response { Status = "Success", Message = "Upload image successfully!" });
+            }
+            
         }
 
         
