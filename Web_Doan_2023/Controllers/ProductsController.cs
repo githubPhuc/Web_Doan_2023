@@ -51,6 +51,8 @@ namespace Web_Doan_2023.Controllers
                             AccessoriesIncluded = a.AccessoriesIncluded,
                             Status = a.Status,
                             idSale = a.idSale,
+                            SaleName = (a.idSale == 0 || a.idSale == null) ? "null" : db_.Sale.Where(c => c.Id == a.idSale).FirstOrDefault().nameSale,
+
                             IsDelete = a.IsDelete,
                         }).ToArray();
 
@@ -117,6 +119,8 @@ namespace Web_Doan_2023.Controllers
                             AccessoriesIncluded = a.AccessoriesIncluded,
                             Status = a.Status,
                             idSale = a.idSale,
+                            SaleName = (a.idSale == 0 || a.idSale == null) ? "null" : db_.Sale.Where(c => c.Id == a.idSale).FirstOrDefault().nameSale,
+
                             IsDelete = a.IsDelete,
                         }).FirstOrDefault();
 
@@ -159,6 +163,8 @@ namespace Web_Doan_2023.Controllers
                             AccessoriesIncluded = a.AccessoriesIncluded,
                             Status = a.Status,
                             idSale = a.idSale,
+                            SaleName = (a.idSale == 0 || a.idSale == null) ? "null" : db_.Sale.Where(c => c.Id == a.idSale).FirstOrDefault().nameSale,
+
                             IsDelete = a.IsDelete,
                         }).ToList();
 
@@ -202,6 +208,8 @@ namespace Web_Doan_2023.Controllers
                             AccessoriesIncluded = a.AccessoriesIncluded,
                             Status = a.Status,
                             idSale = a.idSale,
+                            SaleName = (a.idSale == 0 || a.idSale == null) ? "null" : db_.Sale.Where(c => c.Id == a.idSale).FirstOrDefault().nameSale,
+
                             IsDelete = a.IsDelete,
                         }).ToList();
 
@@ -264,6 +272,7 @@ namespace Web_Doan_2023.Controllers
                         AccessoriesIncluded = model.AccessoriesIncluded,
                         Status = true,
                         idSale = model.idSale,
+
                         IsDelete = false,
 
                     };
