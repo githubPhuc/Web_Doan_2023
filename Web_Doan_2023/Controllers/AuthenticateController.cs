@@ -344,14 +344,9 @@ namespace Web_Doan_2023.Controllers
         }
         [HttpPost]
         [Route("LoginUser")]
-        public async Task<IActionResult> LoginUser([FromBody] Login_model model)
+        public async Task<IActionResult> LoginUser([FromBody] Login_User_model model)
         {
-
-            string key_access = "info_access";
-
-            var user = await userManager.FindByNameAsync(model.Username);
-
-
+            var user = _context.Users.Where(a=>a.Email==model.Email).FirstOrDefault();
             if (user != null && await userManager.CheckPasswordAsync(user, model.Password) && user.IsLocked == false && user.AccoutType == "User")
             {
                 var User_role = await userManager.GetRolesAsync(user);
@@ -388,6 +383,7 @@ namespace Web_Doan_2023.Controllers
                     token = new JwtSecurityTokenHandler().WriteToken(token),
                     expiration = token.ValidTo,
                     id = user.Id,
+                    email= user.Email,
                     phone = user.PhoneNumber,
                     role = user.AccoutType,
                     username = user.UserName,
@@ -399,10 +395,24 @@ namespace Web_Doan_2023.Controllers
                 status = 400
             });
         }
-
+        [NonAction]
+        private string OutNameMail(string email)
+        {
+            char[] chars = email.ToCharArray();
+            string outPut = "";
+            for(int i= 0;i<email.Length; i++)
+            {
+                if (chars[i].ToString() =="@")
+                {
+                    return outPut;
+                }
+                 outPut += chars[i].ToString();
+            }
+            return outPut;
+        }
         [HttpPost]
         [Route("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterModel model)
+        public async Task<IActionResult> Register([FromBody] RegisterUserModel model)
         {
             bool IsSussess = false;
             var data = _context.Users.ToList();
@@ -420,48 +430,37 @@ namespace Web_Doan_2023.Controllers
                 }
                 else
                 {
-                    var userExists = await userManager.FindByNameAsync(model.Username);
 
-                    if (userExists != null)
+                    string UserName = OutNameMail(model.Email);
+                    User user = new User()
                     {
-                        return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
+                        Email = model.Email,
+                        SecurityStamp = Guid.NewGuid().ToString(),
+                        UserName = UserName,
+                        PhoneNumber = model.Phone,
+                        City = model.Cyti,
+                        District = model.District,
+                        Wards = model.Wards,
+                        AccoutType = "User",
+                        images = "No-Image.png",
+                        Fullname = model.FullName,
+                        ShippingAddress = model.ShippingAddress,
+                        IsLocked = false
+                    };
 
-                    }
-                    else
+                    var result = await userManager.CreateAsync(user, model.Password);
+                    if (!result.Succeeded)
+                        return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
+
+                    if (!await roleManager.RoleExistsAsync(User_role.Admin))
+                        await roleManager.CreateAsync(new IdentityRole(User_role.Admin));
+                    if (!await roleManager.RoleExistsAsync(User_role.User))
+                        await roleManager.CreateAsync(new IdentityRole(User_role.User));
+                    if (await roleManager.RoleExistsAsync(User_role.Admin))
                     {
-                        User user = new User()
-                        {
-                            Email = model.Email,
-                            SecurityStamp = Guid.NewGuid().ToString(),
-                            UserName = model.Username,
-                            PhoneNumber = model.Phone,
-                            City = model.Cyti,
-                            District = model.District,
-                            Wards = model.Wards,
-                            AccoutType = "User",
-                            images = "No-Image.png",
-                            Fullname = model.FullName,
-                            ShippingAddress = model.ShippingAddress,
-                            IsLocked = false
-                        };
-
-                        var result = await userManager.CreateAsync(user, model.Password);
-                        if (!result.Succeeded)
-                            return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
-
-                        if (!await roleManager.RoleExistsAsync(User_role.Admin))
-                            await roleManager.CreateAsync(new IdentityRole(User_role.Admin));
-                        if (!await roleManager.RoleExistsAsync(User_role.User))
-                            await roleManager.CreateAsync(new IdentityRole(User_role.User));
-                        if (await roleManager.RoleExistsAsync(User_role.Admin))
-                        {
-                            await userManager.AddToRoleAsync(user, User_role.Admin);
-                        }
-                       return Ok(new Response { Status = "Success", Message = "User created successfully!" });
-                     
-
+                        await userManager.AddToRoleAsync(user, User_role.Admin);
                     }
-
+                    return Ok(new Response { Status = "Success", Message = "User created successfully!" });
 
                 }
             }

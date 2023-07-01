@@ -432,6 +432,7 @@ namespace Web_Doan_2023.Controllers
                                 await file.CopyToAsync(stream);
                                 results = true;
                             }
+
                             dataImage.idProduct = id;
                             dataImage.nameImage = "image" + i + ".png";
                             dataImage.PathImage = GetImagebycode("image" + i + ".png", fileName);
@@ -495,7 +496,7 @@ namespace Web_Doan_2023.Controllers
         private string GetImagebycode(string image,string filename)
         {
             string hosturl = "https://localhost:7109";
-            string Filepath = GetFilePath(filename);
+            string Filepath = GetFilePath(filename) + "/" + image;
             if (System.IO.File.Exists(Filepath))
                 return hosturl + "/image/product/"+filename+"/" + image;
             else
