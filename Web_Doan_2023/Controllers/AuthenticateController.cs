@@ -373,9 +373,6 @@ namespace Web_Doan_2023.Controllers
                     audience: _configuration["JWT:ValidAudience"],
                     expires: DateTime.Now.AddHours(3),
                     claims: authClaims,
-
-
-
                     signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
                     );
                 return Ok(new
@@ -430,7 +427,6 @@ namespace Web_Doan_2023.Controllers
                 }
                 else
                 {
-
                     string UserName = OutNameMail(model.Email);
                     User user = new User()
                     {

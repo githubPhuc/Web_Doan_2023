@@ -1,4 +1,5 @@
 ﻿using AutoMapper.Configuration.Conventions;
+using System.ComponentModel.DataAnnotations;
 
 namespace Web_Doan_2023.Models
 {
@@ -7,6 +8,7 @@ namespace Web_Doan_2023.Models
         public int Id { get; set; }
         public string? codeProduce { get; set; }
         public string? nameProduce { get; set; }
+        [Phone]
         public string? Phone { get; set; }
         public string? Email { get; set; }
         public int? idWards { get; set; }
