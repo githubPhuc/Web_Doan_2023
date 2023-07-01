@@ -86,6 +86,19 @@ namespace Web_Doan_2023.Controllers
                 data = data
             });
         }
+        // GET: api/Products/5
+        [HttpGet("GetCBX")]
+        public async Task<ActionResult> GetCBX()
+        {
+            var data = (from a in db_.Product
+                        where a.IsDelete == false
+                        select a).ToList();
+            return Ok(new
+            {
+                data = data,
+                count = data.Count()
+            });
+        }
         [HttpGet("GetProductOnIdDetail")]
         public async Task<ActionResult> GetProductOnIdDetail(int id)
         {
@@ -214,6 +227,26 @@ namespace Web_Doan_2023.Controllers
                         }).ToList();
 
 
+            return Ok(new
+            {
+                data = data,
+                count = data.Count()
+            });
+        }
+        [HttpGet("ListImages")]
+        public async Task<ActionResult> ListImages(int idProduct)
+        {
+            var data = (from a in db_.Images
+                        where a.idProduct ==idProduct
+                       select new
+                       {
+                           id=a.Id,
+                           idProduct = a.idProduct,
+                           nameProduct = (a.idProduct==0||a.idProduct==null)?"":db_.Product.Where(c=>c.Id==a.idProduct).FirstOrDefault().nameProduct,
+                           PathImage = a.PathImage,
+                           nameImage = a.nameImage,
+                       }).ToList();
+           // var data = list.Where(a => (nameProduct == null || nameProduct == "" || a.nameProduct.ToUpper().Contains(nameProduct.ToUpper()))).ToList();
             return Ok(new
             {
                 data = data,
@@ -400,7 +433,8 @@ namespace Web_Doan_2023.Controllers
                                 results = true;
                             }
                             dataImage.idProduct = id;
-                            dataImage.nameImage = imagePath;
+                            dataImage.nameImage = "image" + i + ".png";
+                            dataImage.PathImage = GetImagebycode("image" + i + ".png", fileName);
                             db_.Images.Add(dataImage);
                             await db_.SaveChangesAsync();
                             i++;
@@ -424,17 +458,25 @@ namespace Web_Doan_2023.Controllers
         [HttpPost("DeleteProduct")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
-            var dataProduct = db_.Product.FirstOrDefault(a => a.Id == id);
-            if (dataProduct == null)
+           var checkDepot =db_.productDepot.Where(x => x.idProduct == id).ToList();
+            if(checkDepot.Count() == 0)
             {
-                return Ok(new Response { Status = "Failed", Message = "Product is null!" });
+                var dataProduct = db_.Product.FirstOrDefault(a => a.Id == id);
+                if (dataProduct == null)
+                {
+                    return Ok(new Response { Status = "Failed", Message = "Product is null!" });
+                }
+                else
+                {
+                    dataProduct.IsDelete = true;
+                    db_.Entry(dataProduct).State = EntityState.Modified;
+                    await db_.SaveChangesAsync();
+                    return Ok(new Response { Status = "Success", Message = "Upload image successfully!" });
+                }
             }
             else
             {
-                dataProduct.IsDelete = true;
-                db_.Entry(dataProduct).State = EntityState.Modified;
-                await db_.SaveChangesAsync();
-                return Ok(new Response { Status = "Success", Message = "Upload image successfully!" });
+                return Ok(new Response { Status = "Failed", Message = "Please delete in the import depot!" });
             }
             
         }
@@ -450,12 +492,12 @@ namespace Web_Doan_2023.Controllers
             return this._environment.WebRootPath+"\\image\\product\\"+ productCode;
         }
         [NonAction]
-        private string GetImagebycode(string image)
+        private string GetImagebycode(string image,string filename)
         {
             string hosturl = "https://localhost:7109";
-            string Filepath = GetFilePath(image);
+            string Filepath = GetFilePath(filename);
             if (System.IO.File.Exists(Filepath))
-                return hosturl + "/image/product/" + image;
+                return hosturl + "/image/product/"+filename+"/" + image;
             else
                 return hosturl + "/image/product/No-Image.png";
         }

@@ -371,7 +371,6 @@ namespace Web_Doan_2023.Controllers
                     }
 
                 }
-
                 var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
 
                 var token = new JwtSecurityToken(

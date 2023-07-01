@@ -644,6 +644,7 @@ namespace Web_Doan_2023.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("PathImage")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("ProductId")
@@ -673,10 +674,16 @@ namespace Web_Doan_2023.Migrations
                     b.Property<DateTime?>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("IdDepot")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsAcceptance")
                         .HasColumnType("bit");
 
                     b.Property<decimal?>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("Quantity")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Status")
@@ -692,12 +699,36 @@ namespace Web_Doan_2023.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("codeBill")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.ToTable("ImportBillDepot");
+                });
+
+            modelBuilder.Entity("Web_Doan_2023.Models.ImportBillDepotDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("BillId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("idProduct")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ImportBillDepotDetail");
                 });
 
             modelBuilder.Entity("Web_Doan_2023.Models.Menu", b =>
@@ -869,13 +900,11 @@ namespace Web_Doan_2023.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("portConnection")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("price")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<int?>("productDepotId")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -884,8 +913,6 @@ namespace Web_Doan_2023.Migrations
                     b.HasIndex("CategoryProductId");
 
                     b.HasIndex("ProducerId");
-
-                    b.HasIndex("productDepotId");
 
                     b.ToTable("Product");
                 });
@@ -1246,10 +1273,6 @@ namespace Web_Doan_2023.Migrations
                     b.HasOne("Web_Doan_2023.Models.Producer", null)
                         .WithMany("Products")
                         .HasForeignKey("ProducerId");
-
-                    b.HasOne("Web_Doan_2023.Models.productDepot", null)
-                        .WithMany("products")
-                        .HasForeignKey("productDepotId");
                 });
 
             modelBuilder.Entity("Web_Doan_2023.Models.User", b =>
@@ -1305,11 +1328,6 @@ namespace Web_Doan_2023.Migrations
             modelBuilder.Entity("Web_Doan_2023.Models.Product", b =>
                 {
                     b.Navigation("images");
-                });
-
-            modelBuilder.Entity("Web_Doan_2023.Models.productDepot", b =>
-                {
-                    b.Navigation("products");
                 });
 #pragma warning restore 612, 618
         }

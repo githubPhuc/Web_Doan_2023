@@ -58,8 +58,8 @@ namespace Web_Doan_2023.Controllers
 
         // PUT: api/CartProducts/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCartProduct(int cartID, int Quantity, decimal sale = 0)
+        [HttpPost("Update")]
+        public async Task<IActionResult> Update(int cartID, int Quantity, decimal sale = 0)
         {
             var cart = await _context.CartProduct.FindAsync(cartID);
             var proid = cart.ProductId;
