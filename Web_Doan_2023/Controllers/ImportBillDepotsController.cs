@@ -75,7 +75,6 @@ namespace Web_Doan_2023.Controllers
                 count = data.Count()
             });
         }
-
         [HttpGet("GetListOnID")]
         public async Task<ActionResult> GetListOnID(int id)
         {

@@ -95,7 +95,7 @@ namespace Web_Doan_2023.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Route("addCart")]
-        public async Task<ActionResult<CartProduct>> addCart(int idProduct, int Quantity, string userID, decimal sale)
+        public async Task<ActionResult<CartProduct>> addCart(int idProduct, int Quantity, string userID, int idSale)
         {
             var check = await _context.CartProduct.Where(c => c.ProductId == idProduct && c.userID == userID).FirstOrDefaultAsync();
             var pro = await _context.productDepot.FindAsync(idProduct);
@@ -117,13 +117,15 @@ namespace Web_Doan_2023.Controllers
             }
             else
             {
+                var data = _context.Sale.Where(a => a.Id == idSale).FirstOrDefault();
+
                 var dataProduct = _context.Product.FirstOrDefault(b => b.Id == idProduct);
                 var cart = new CartProduct();
                 cart.userID = userID;
                 cart.ProductId = idProduct;
                 cart.Price = (decimal)dataProduct.price;
                 cart.Quantity = Quantity;
-                cart.salePrice = sale;
+                cart.salePrice = (data.marth == null || data.marth == 0) ? 0 : data.marth;
                 cart.ProductName = dataProduct.nameProduct;
                 cart.CreatedDate = DateTime.Now;
                 cart.Status = false;
