@@ -125,6 +125,7 @@ namespace Web_Doan_2023.Controllers
                               {
                                   fullname = a.Fullname,
                                   images = a.images,
+                                  PathImage = "https://localhost:7109/image/Account/" + a.images,
                                   accoutType = a.AccoutType,
                                   city = a.City,
                                   CityName = (a.City == 0 || a.City == null) ? "null" : _context.City.Where(c => c.Id == a.City).FirstOrDefault().NameCity,
