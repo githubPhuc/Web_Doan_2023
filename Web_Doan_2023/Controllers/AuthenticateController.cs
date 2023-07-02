@@ -594,7 +594,7 @@ namespace Web_Doan_2023.Controllers
                     }
                 }
 
-
+                HttpContext.Session.SetString("OTP", password);
                 string content = "Đây là mã xác thực tài khoản <font color='blue'> Shop </font> của bạn <br>";
                 string token = content + "<h1>" + password + "</h1>";
                 string _from = "0306191061@caothang.edu.vn";
