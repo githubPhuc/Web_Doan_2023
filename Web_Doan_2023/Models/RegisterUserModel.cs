@@ -4,7 +4,7 @@ namespace Web_Doan_2023.Models
 {
     public class RegisterUserModel
     {
-       
+        public string FullName { get; set; }
         [EmailAddress]
         [Required(ErrorMessage = "Email is required")]
         public string Email { get; set; }
