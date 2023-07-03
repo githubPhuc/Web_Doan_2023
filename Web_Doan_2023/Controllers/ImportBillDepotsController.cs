@@ -106,11 +106,13 @@ namespace Web_Doan_2023.Controllers
             {
                 var data = new ImportBillDepot()
                 {
+                    IdDepot = model.IdDepot,
                     codeBill = "",
                     UpdatedDate = DateTime.Now,
                     CreatedDate = DateTime.Now,
                     Price = 0,
-                    IsAcceptance = model.IsAcceptance,
+                    Quantity = 0,
+                    IsAcceptance = false,
                     UserCreate = model.UserCreate,
                     Status = isStatus.WaitingForApproval,
                 };
@@ -120,7 +122,7 @@ namespace Web_Doan_2023.Controllers
                 data.codeBill = code;
                 db_.Entry(data).State = EntityState.Modified;
                 await db_.SaveChangesAsync();
-                return Ok(new Response { Status = "Success", Message = "Insert product " + model.codeBill + " successfully!" });
+                return Ok(new Response { Status = "Success", Message = "Import Bill Depot " + model.codeBill + " successfully!" });
 
             }
             catch (Exception ex)
@@ -135,6 +137,10 @@ namespace Web_Doan_2023.Controllers
             try
             {
                 var checkBill = db_.ImportBillDepot.Where(a=>a.Id== model.BillId).FirstOrDefault();
+                if (checkBill.IsAcceptance == true)
+                {
+                    return Ok(new Response { Status = "Failed", Message = "Import depot Acceptance!" });
+                }
                 if (checkBill == null)
                 {
                     return Ok(new Response { Status = "Failed", Message = "Bill import depot is null" });
@@ -149,6 +155,9 @@ namespace Web_Doan_2023.Controllers
                         Quantity = model.Quantity,
                     };
                     db_.ImportBillDepotDetail.Add(data);
+                    checkBill.Quantity += model.Quantity;
+                    checkBill.Price += model.price;
+                    db_.Entry(checkBill).State = EntityState.Modified;
                     await db_.SaveChangesAsync();
                     return Ok(new Response { Status = "Success", Message = "Insert successfully!" });
                 }
@@ -170,9 +179,20 @@ namespace Web_Doan_2023.Controllers
             }// kiểm tra 
             try
             {
-                db_.ImportBillDepotDetail.Remove(data);
-                await db_.SaveChangesAsync();
-                return Ok(new Response { Status = "Success", Message = "Delete successfully" });
+                var checkBill = db_.ImportBillDepot.FirstOrDefault(a => a.Id == data.BillId);
+                if(checkBill.IsAcceptance==true)
+                {
+                    return Ok(new Response { Status = "Failed", Message = "Import depot Acceptance!" });
+                }
+                else
+                {
+                    checkBill.Quantity -= data.Quantity;
+                    checkBill.Price -= data.price;
+                    db_.Entry(checkBill).State = EntityState.Modified;
+                    db_.ImportBillDepotDetail.Remove(data);
+                    await db_.SaveChangesAsync();
+                    return Ok(new Response { Status = "Success", Message = "Delete successfully" });
+                }
             }
             catch (Exception ex)
             {
@@ -189,10 +209,14 @@ namespace Web_Doan_2023.Controllers
             }// kiểm tra 
             try
             {
-                var data = db_.ImportBillDepot.Where(a => a.Id == id && a.IsAcceptance==false).FirstOrDefault();
-                if (data == null)
+                var data = db_.ImportBillDepot.Where(a => a.Id == id ).FirstOrDefault();
+                if (data.IsAcceptance == true)
                 {
                     return Ok(new Response { Status = "Failed", Message = "Import depot Acceptance!" });
+                }
+                if (data == null)
+                {
+                    return Ok(new Response { Status = "Failed", Message = "Warehouse import does not exist!" });
                 }
                 else
                 {
@@ -207,50 +231,60 @@ namespace Web_Doan_2023.Controllers
             }
         }
         [HttpPost("acceptance")]
-        public async Task<IActionResult> acceptance(int id)
+        public async Task<IActionResult> acceptance(int id,string user)
         {
             
             try
             {
                 var data = db_.ImportBillDepot.Where(a => a.Id == id).FirstOrDefault();
-                data.IsAcceptance = true;
-                db_.Entry(data).State = EntityState.Modified;
-                await db_.SaveChangesAsync();
-                var data_billDetail = db_.ImportBillDepotDetail.Where(a => a.BillId == id).ToList();
-                if(data_billDetail.Count()>0)
+                if(data.IsAcceptance==true)
                 {
-                    try
-                    {
-                        foreach (var item in data_billDetail)
-                        {
-                            var check_ProductDepot = db_.productDepot.Where(a => a.idProduct == item.idProduct&& a.idDepot==data.IdDepot).FirstOrDefault();
-                            if(check_ProductDepot == null)
-                            {
-                                var data_productDepot = new productDepot()
-                                {
-                                    idProduct = item.idProduct,
-                                    idDepot = data.IdDepot,
-                                    QuantityProduct = item.Quantity,
-                                };
-                                db_.productDepot.Add(data_productDepot);
-                                db_.SaveChanges();
-                            }
-                            else
-                            {
-                                check_ProductDepot.QuantityProduct = item.Quantity;
-                                db_.Entry(check_ProductDepot).State = EntityState.Modified;
-                                await db_.SaveChangesAsync();
-                            }
-                        }
-                        return Ok(new Response { Status = "Success", Message = "successfully" });
-                    }
-                    catch (Exception ex)
-                    {
-                        return Ok(new Response { Status = "Failed", Message = ex.Message });
-                    }
-
+                    return Ok(new Response { Status = "Failed", Message = " Order approved" });
                 }
-                return Ok(new Response { Status = "Failed", Message = "successfully" });
+                else
+                {
+                    data.IsAcceptance = true;
+                    data.UserUpdate = user;
+                    data.Status = isStatus.warehouseimported;
+                    data.UpdatedDate = DateTime.Now;
+                    db_.Entry(data).State = EntityState.Modified;
+                    await db_.SaveChangesAsync();
+                    var data_billDetail = db_.ImportBillDepotDetail.Where(a => a.BillId == id).ToList();
+                    if (data_billDetail.Count() > 0)
+                    {
+                        try
+                        {
+                            foreach (var item in data_billDetail)
+                            {
+                                var check_ProductDepot = db_.productDepot.Where(a => a.idProduct == item.idProduct && a.idDepot == data.IdDepot).FirstOrDefault();
+                                if (check_ProductDepot == null)
+                                {
+                                    var data_productDepot = new productDepot()
+                                    {
+                                        idProduct = item.idProduct,
+                                        idDepot = data.IdDepot,
+                                        QuantityProduct = item.Quantity,
+                                    };
+                                    db_.productDepot.Add(data_productDepot);
+                                    db_.SaveChanges();
+                                }
+                                else
+                                {
+                                    check_ProductDepot.QuantityProduct = item.Quantity;
+                                    db_.Entry(check_ProductDepot).State = EntityState.Modified;
+                                    await db_.SaveChangesAsync();
+                                }
+                            }
+                            return Ok(new Response { Status = "Success", Message = "acceptance successfully" });
+                        }
+                        catch (Exception ex)
+                        {
+                            return Ok(new Response { Status = "Failed", Message = ex.Message });
+                        }
+
+                    }
+                    return Ok(new Response { Status = "Success", Message = "acceptance successfully" });
+                }
             }
             catch (Exception ex)
             {

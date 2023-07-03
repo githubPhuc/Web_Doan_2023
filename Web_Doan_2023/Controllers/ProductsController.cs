@@ -51,7 +51,7 @@ namespace Web_Doan_2023.Controllers
                             AccessoriesIncluded = a.AccessoriesIncluded,
                             Status = a.Status,
                             idSale = a.idSale,
-                            SaleName = (a.idSale == 0 || a.idSale == null) ? "null" : db_.Sale.Where(c => c.Id == a.idSale).FirstOrDefault().nameSale,
+                            SaleName = (a.idSale == 0 || a.idSale == null) ? "" : db_.Sale.Where(c => c.Id == a.idSale).FirstOrDefault().nameSale,
 
                             IsDelete = a.IsDelete,
                         }).ToArray();
@@ -305,9 +305,7 @@ namespace Web_Doan_2023.Controllers
                         AccessoriesIncluded = model.AccessoriesIncluded,
                         Status = true,
                         idSale = model.idSale,
-
                         IsDelete = false,
-
                     };
                     db_.Product.Add(data);
                     await db_.SaveChangesAsync();
@@ -381,11 +379,10 @@ namespace Web_Doan_2023.Controllers
         [HttpPost("uploadImage")]
         public async Task<ActionResult> uploadImage(int id)
         {
-            bool results = false;
             try
             {
                 var formCollection = await  Request.ReadFormAsync();
-                var file_ = formCollection.Files.ToList();
+                var file_ = formCollection.Files.First();
                 var dataProduct = db_.Product.FirstOrDefault(a => a.Id == id);
                 if (dataProduct == null)
                 {
@@ -393,18 +390,9 @@ namespace Web_Doan_2023.Controllers
                 }//Kiễm tra sự tồn tại của sản phẩm 
                 else
                 {
-                    var checkImage = db_.Images.Where(a=>a.idProduct==dataProduct.Id).ToList();
-                    if (checkImage.Count() > 0)
+                    if (file_!= null)
                     {
-                        foreach (var image in checkImage)
-                        {
-                            db_.Images.Remove(image);
-                            db_.SaveChanges();
-                        }
-                    }
-                    if (file_.Count() > 0)
-                    {
-                        string fileName = "Product-"+dataProduct.Id.ToString();
+                        string fileName = "Product-" + dataProduct.Id.ToString();
                         string filePath = GetFilePath(fileName);
 
                         if (!System.IO.Directory.Exists(filePath))
@@ -417,29 +405,24 @@ namespace Web_Doan_2023.Controllers
 
                             System.IO.File.Delete(filePath);
                         }
-                        int i = 0;
-                        foreach (var file in file_)
+                        string imageName = (Guid.NewGuid().ToString())+ ".png";
+                        var dataImage = new Images();//khởi tạo data image
+                        string imagePath = filePath + "\\"+ imageName;
+                        if (System.IO.File.Exists(imagePath))
                         {
-                            var dataImage = new Images();//khởi tạo data image
-                            string imagePath = filePath + "\\image" + i + ".png";
-                            if (System.IO.File.Exists(imagePath))
-                            {
-                                System.IO.File.Delete(imagePath);
-                            }
-                            dataImage.nameImage = imagePath;
-                            using (FileStream stream = System.IO.File.Create(imagePath))
-                            {
-                                await file.CopyToAsync(stream);
-                                results = true;
-                            }
-
-                            dataImage.idProduct = id;
-                            dataImage.nameImage = "image" + i + ".png";
-                            dataImage.PathImage = GetImagebycode("image" + i + ".png", fileName);
-                            db_.Images.Add(dataImage);
-                            await db_.SaveChangesAsync();
-                            i++;
+                            System.IO.File.Delete(imagePath);
                         }
+                        using (FileStream stream = System.IO.File.Create(imagePath))
+                        {
+                            await file_.CopyToAsync(stream);
+                            
+                        }
+                        dataImage.idProduct = id;
+                        dataImage.nameImage = imageName;
+                        dataImage.PathImage = GetImagebycode(imageName, fileName);
+                        db_.Images.Add(dataImage);
+                        await db_.SaveChangesAsync();
+
                         return Ok(new Response { Status = "Success", Message = "Upload image successfully!" });
                     }
                     else
@@ -447,13 +430,42 @@ namespace Web_Doan_2023.Controllers
                         return Ok(new Response { Status = "Failed", Message = "File is null!" });
                     }
                 }
-                
+
             }
             catch (Exception ex)
             {
                 return Ok(ex);
             }
         }
+        [HttpPost("deleteImage")]
+        public async Task<ActionResult> deleteImage(int id,int idProduct)
+        {
+            bool isSuccess = false;
+            var data = db_.Images.Where(a => a.Id == id).FirstOrDefault();
+            if (data != null)
+            {
+                string fileName = "Product-" + idProduct;
+                string filePath = GetFilePath(fileName);
+                string imagePath = filePath + "\\" + data.nameImage;
+                if (System.IO.File.Exists(imagePath))
+                {
+                    System.IO.File.Delete(imagePath);
+                    isSuccess=true;
+                }
+                if (isSuccess == true)
+                {
+                    db_.Images.Remove(data);
+                    db_.SaveChanges();
+                    return Ok(new Response { Status = "Success", Message = "Delete image successfully!" });
+                }
+                return Ok(new Response { Status = "Failed", Message = "Delete file image Failed!" });
+            }
+            else
+            {
+                return Ok(new Response { Status = "Failed", Message = "image not exist!" });
+            }
+        }
+       
 
         // DELETE: api/Products/5
         [HttpPost("DeleteProduct")]
