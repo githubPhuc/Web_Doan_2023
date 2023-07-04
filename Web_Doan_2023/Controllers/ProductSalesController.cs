@@ -25,7 +25,7 @@ namespace Web_Doan_2023.Controllers
         [HttpGet("GetListSale")]
         public async Task<ActionResult> GetListSale()
         {
-            var data = await db_.Sale.Where(a=>a.Status==true).ToListAsync();
+            var data = await db_.Sale.ToListAsync();
             return Ok(new
             {
                 data = data,
