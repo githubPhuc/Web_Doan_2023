@@ -276,6 +276,11 @@ namespace Web_Doan_2023.Controllers
                                     db_.Entry(check_ProductDepot).State = EntityState.Modified;
                                     await db_.SaveChangesAsync();
                                 }
+                                var data_Product = db_.Product.Where(a => a.Id == item.idProduct).FirstOrDefault();
+                                data_Product.price = item.price;
+                                data_Product.Status = true;
+                                db_.Entry(data_Product).State = EntityState.Modified;
+                                await db_.SaveChangesAsync();
                             }
                             isSuccess = true;
                         }
@@ -295,6 +300,94 @@ namespace Web_Doan_2023.Controllers
                     content += "<a href=\"http://localhost:4200/Login\">Chuyển tiếp</a>";
                     string _from = "0306191061@caothang.edu.vn";
                     string _subject = "XÁC NHẬN ĐƠN NHẬP KHO";
+                    string _body = content;
+                    string _gmail = "0306191061@caothang.edu.vn";
+                    string _password = "285728207";
+                    MailMessage message = new MailMessage(_from, "ptranninh@gmail.com", _subject, _body);
+                    message.BodyEncoding = System.Text.Encoding.UTF8;
+                    message.SubjectEncoding = System.Text.Encoding.UTF8;
+                    message.IsBodyHtml = true;
+                    message.ReplyToList.Add(new MailAddress(_from));
+                    message.Sender = new MailAddress(_from);
+
+                    using var smtpClient = new SmtpClient("smtp.gmail.com");
+                    smtpClient.Port = 587;
+                    smtpClient.EnableSsl = true;
+                    smtpClient.Credentials = new NetworkCredential(_gmail, _password);
+
+                    try
+                    {
+                        await smtpClient.SendMailAsync(message);
+                        return Ok(new Response { Status = "Success", Message = "acceptance successfully" });
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                        return Ok(new Response { Status = "Failed", Message = "Send mail Failed" });
+                    }
+                }
+                else
+                {
+                    return Ok(new Response { Status = "Failed", Message = "acceptance Failed" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Ok(new Response { Status = "Failed", Message = ex.Message });
+            }
+        }
+        [HttpPost("discouragement")]
+        public async Task<IActionResult> discouragement(int id, string user)//không chấp thuận
+        {
+            bool isSuccess = false;
+            try
+            {
+                var data = db_.ImportBillDepot.Where(a => a.Id == id).FirstOrDefault();
+                if (data.IsAcceptance == false)
+                {
+                    return Ok(new Response { Status = "Failed", Message = "Import depot has not been accepted" });
+                }
+                else
+                {
+                    data.IsAcceptance = false;
+                    data.UserUpdate = user;
+                    data.Status = isStatus.Cancel;
+                    data.UpdatedDate = DateTime.Now;
+                    db_.Entry(data).State = EntityState.Modified;
+                    await db_.SaveChangesAsync();
+                    var data_billDetail = db_.ImportBillDepotDetail.Where(a => a.BillId == id).ToList();
+                    if (data_billDetail.Count() > 0)
+                    {
+                        try
+                        {
+                            foreach (var item in data_billDetail)
+                            {
+                                var check_ProductDepot = db_.productDepot.Where(a => a.idProduct == item.idProduct && a.idDepot == data.IdDepot).FirstOrDefault();
+                                db_.Remove(check_ProductDepot);
+                                var data_Product = db_.Product.Where(a => a.Id == item.idProduct).FirstOrDefault();
+                                data_Product.price = 0;
+                                data_Product.Status = false;
+                                db_.Entry(data_Product).State = EntityState.Modified;
+                                await db_.SaveChangesAsync();
+                            }
+                            isSuccess = true;
+                        }
+                        catch (Exception ex)
+                        {
+                            return Ok(new Response { Status = "Failed", Message = ex.Message });
+                        }
+
+                    }
+                    isSuccess = true;
+                }
+                if (isSuccess == true)
+                {
+                    string content = "Mail xác nhận đơn hàng nhập kho đả được hủy<br>";
+                    content += "Kính gửi:Anh/Chị<br> Chứng từ nhập kho có mã <font color='blue'> " + data.codeBill + " </font> đả được user " + user + " hủy <br>";
+                    content += "Kiểm tra lại tại chương trình grament <br>";
+                    content += "<a href=\"http://localhost:4200/Login\">Chuyển tiếp</a>";
+                    string _from = "0306191061@caothang.edu.vn";
+                    string _subject = "HỦY ĐƠN NHẬP KHO";
                     string _body = content;
                     string _gmail = "0306191061@caothang.edu.vn";
                     string _password = "285728207";

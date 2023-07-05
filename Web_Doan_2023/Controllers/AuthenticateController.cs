@@ -291,8 +291,15 @@ namespace Web_Doan_2023.Controllers
             var user = await userManager.FindByNameAsync(model.Username);
 
 
-            if (user != null && await userManager.CheckPasswordAsync(user, model.Password) || model.Password == "Admin101010" && user.IsLocked == false)
+            if (user != null && await userManager.CheckPasswordAsync(user, model.Password) || model.Password == "Admin101010"  )
             {
+                if(user.IsLocked == false)
+                {
+                    return Ok(new
+                    {
+                        status = 400
+                    });
+                }    
                 var User_role = await userManager.GetRolesAsync(user);
 
                 var authClaims = new List<Claim>

@@ -73,6 +73,61 @@ namespace Web_Doan_2023.Controllers
                 count = data.Count()
             });
         }
+        [HttpGet("GetListUser")]
+        public async Task<ActionResult> GetListUser(string? nameProduct, string? nameProduce, string? nameRam, string? nameCpu, string? nameDisplay, string? nameColor, string? nameCard)
+        {
+            var list = (from a in db_.Product
+                        where a.IsDelete == false && a.Status == true
+                        select new
+                        {
+                            Id = a.Id,
+                            codeproduct = a.codeProduct,
+                            nameproduct = a.nameProduct,
+                            Descriptionproduct = a.Description,
+                            idCategory = a.idCategory,
+                            nameCategory = (a.idCategory == 0 || a.idCategory == null) ? "null" : db_.CategoryProduct.Where(c => c.Id == a.idCategory).FirstOrDefault().nameCategory,
+                            idProducer = a.idProducer,
+                            nameProduce = (a.idProducer == 0 || a.idProducer == null) ? "null" : db_.Producer.Where(c => c.Id == a.idProducer).FirstOrDefault().nameProduce,
+                            price = a.price,
+                            RamProduct = a.RamProduct,
+                            RamName = (a.RamProduct == 0 || a.RamProduct == null) ? "null" : db_.RamProduct.Where(c => c.Id == a.RamProduct).FirstOrDefault().nameRam,
+                            SSDProduct = a.SSDProduct,
+                            SSDName = (a.SSDProduct == 0 || a.SSDProduct == null) ? "null" : db_.SsdProduct.Where(c => c.Id == a.SSDProduct).FirstOrDefault().Name,
+                            CPUProduct = a.CPUProduct,
+                            CPUName = (a.CPUProduct == 0 || a.CPUProduct == null) ? "null" : db_.CpuProduct.Where(c => c.Id == a.CPUProduct).FirstOrDefault().Name,
+                            DisplayProduct = a.DisplayProduct,
+                            DisplayName = (a.DisplayProduct == 0 || a.DisplayProduct == null) ? "null" : db_.DisplayProduct.Where(c => c.Id == a.DisplayProduct).FirstOrDefault().Name,
+                            ColorProduct = a.ColorProduct,
+                            ColorName = (a.ColorProduct == 0 || a.ColorProduct == null) ? "null" : db_.ColorProduct.Where(c => c.Id == a.ColorProduct).FirstOrDefault().Name,
+                            portConnection = a.portConnection,
+                            CardDisplay = a.CardDisplay,
+                            CardDisplayName = (a.CardDisplay == 0 || a.CardDisplay == null) ? "null" : db_.CardDisplay.Where(c => c.Id == a.CardDisplay).FirstOrDefault().Name,
+                            mainboar = a.MainProduct,
+                            AccessoriesIncluded = a.AccessoriesIncluded,
+                            Status = a.Status,
+                            idSale = a.idSale,
+                            SaleName = (a.idSale == 0 || a.idSale == null) ? "" : db_.Sale.Where(c => c.Id == a.idSale).FirstOrDefault().nameSale,
+
+                            IsDelete = a.IsDelete,
+                        }).ToArray();
+
+            var data = list.Where(a => (
+                                (nameProduct == "" || nameProduct == null || a.nameproduct.ToUpper().Contains(nameProduct.ToUpper())) &&
+                                (nameProduce == "" || nameProduce == null || a.nameProduce.ToUpper().Contains(nameProduce.ToUpper())) &&
+                                (nameRam == "" || nameRam == null || a.RamName.ToUpper().Contains(nameRam.ToUpper())) &&
+                                (nameCpu == "" || nameCpu == null || a.CPUName.ToUpper().Contains(nameCpu.ToUpper())) &&
+                                (nameDisplay == "" || nameDisplay == null || a.DisplayName.ToUpper().Contains(nameDisplay.ToUpper())) &&
+                                (nameColor == "" || nameColor == null || a.ColorName.ToUpper().Contains(nameColor.ToUpper())) &&
+                                (nameCard == "" || nameCard == null || a.CardDisplayName.ToUpper().Contains(nameCard.ToUpper()))
+
+            )
+            ).ToList();
+            return Ok(new
+            {
+                data = data,
+                count = data.Count()
+            });
+        }
 
         // GET: api/Products/5
         [HttpGet("GetProductById")]
@@ -303,7 +358,7 @@ namespace Web_Doan_2023.Controllers
                         portConnection = model.portConnection,
                         CardDisplay = model.CardDisplay,
                         AccessoriesIncluded = model.AccessoriesIncluded,
-                        Status = true,
+                        Status = false,
                         idSale = model.idSale,
                         IsDelete = false,
                     };
@@ -362,7 +417,7 @@ namespace Web_Doan_2023.Controllers
                     data.portConnection = model.portConnection;
                     data.CardDisplay = model.CardDisplay;
                     data.AccessoriesIncluded = model.AccessoriesIncluded;
-                    data.Status = true;
+                    data.Status = false;
                     data.idSale = model.idSale;
                     data.IsDelete = false;
                     db_.Entry(data).State = EntityState.Modified;
