@@ -40,8 +40,7 @@ namespace Web_Doan_2023.Controllers
                               Quantity = a.Quantity,
                               price = (a.salePrice == 0 ? b.price : (b.price - a.salePrice)) * a.Quantity,
                               salePrice = a.salePrice,
-                              image = _context.Images.Where(d => d.idProduct == a.Id).Select(d => d.nameImage).ToList().Take(1),
-
+                              image = _context.Images.Where(d => d.idProduct == a.Id).Select(d => d.PathImage).ToList().Take(1),
                               SoLuongCart = (from a in _context.CartProduct
                                              where a.userID == UserID
                                              select a).Count()
@@ -72,11 +71,8 @@ namespace Web_Doan_2023.Controllers
             }
             if (cart.Quantity > pro.QuantityProduct)
             {
-                return Ok(new
-                {
-                    Status = 500,
-                    msg = "Số lượng sản phẩm không đủ"
-                });
+                
+                return Ok(new Response { Status = "Failed", Message = "Số lượng sản phẩm không đủ!" });
             }
             if (cart.Quantity <= 0)
             {
@@ -102,11 +98,7 @@ namespace Web_Doan_2023.Controllers
 
             if (Quantity > pro.QuantityProduct)
             {
-                return Ok(new
-                {
-                    status = 500,
-                    msg = "Số lượng sản phẩm không đủ"
-                });
+                return Ok(new Response { Status = "Success", Message = "Add cart successfully!" });
             }
 
             if (check != null)
@@ -117,27 +109,38 @@ namespace Web_Doan_2023.Controllers
             }
             else
             {
-                var data = _context.Sale.Where(a => a.Id == idSale).FirstOrDefault();
-
+                var dataSale = (from a in _context.ProductSale
+                                join b in _context.Sale on a.saleId equals b.Id
+                                where a.productId == idProduct
+                                where a.saleId== idSale
+                               select new
+                               {
+                                   a.Id,
+                                   b.nameSale,
+                                   b.marth,
+                                   b.Unit,
+                                   b.Status,
+                               }).FirstOrDefault();
                 var dataProduct = _context.Product.FirstOrDefault(b => b.Id == idProduct);
+                if (dataProduct != null)
+                {
+                    return Ok(new Response { Status = "Failed", Message = "Sản phẩm không tồn tại!" });
+                }
                 var cart = new CartProduct();
                 cart.userID = userID;
                 cart.ProductId = idProduct;
                 cart.Price = (decimal)dataProduct.price;
                 cart.Quantity = Quantity;
-                cart.salePrice = (data.marth == null || data.marth == 0) ? 0 : data.marth;
+                cart.salePrice = (dataSale == null || dataSale.marth == 0) ? 0 : dataSale.marth;
                 cart.ProductName = dataProduct.nameProduct;
                 cart.CreatedDate = DateTime.Now;
-                cart.Status = false;
+                cart.Status = true;
                 _context.Add(cart);
                 await _context.SaveChangesAsync();
+                return Ok(new Response { Status = "Success", Message = "Insert cart successfully!" });
             }
 
-            return Ok(new
-            {
-                status = 200,
-                msg = "Đã thêm vào giỏ hàng"
-            });
+            return Ok(new Response { Status = "Failed", Message = "Sản phẩm không tồn tại!" });
         }
 
         //DELETE: api/CartProducts/5

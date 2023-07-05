@@ -14,111 +14,47 @@ namespace Web_Doan_2023.Controllers
     [ApiController]
     public class BillOfSalesController : ControllerBase
     {
-        private readonly Web_Doan_2023Context _context;
+        private readonly Web_Doan_2023Context db_;
 
         public BillOfSalesController(Web_Doan_2023Context context)
         {
-            _context = context;
+            db_ = context;
         }
 
         // GET: api/BillOfSales
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<BillOfSale>>> GetBillOfSale()
+        [HttpGet("GetList")]
+        public async Task<ActionResult> GetList(string? code)
         {
-          if (_context.BillOfSale == null)
-          {
-              return NotFound();
-          }
-            return await _context.BillOfSale.ToListAsync();
+            var list = (from a in db_.BillOfSale
+                        where a.IsDelete == false
+                        select new
+                        {
+                            Id = a.Id,
+                            Name = a.Name,
+                            code = a.code,
+                            price = a.price,
+                            createDate = a.createDate,
+                            updateDate = a.updateDate,
+                            deleteDate = a.deleteDate,
+                            UsernameCreate = a.UsernameCreate,
+                            UsernameDelete = a.UsernameDelete,
+                            UsernameUpdate = a.UsernameUpdate,
+                            IsDelete = a.IsDelete,
+                            StatusBill = a.StatusBill,
+                            StatusCode = a.StatusCode,
+                        }).ToList();
+            var data = list.Where(a=>(code==null||code==""||a.code.ToUpper().Contains(code.ToUpper()))).ToList();
+            return Ok(new
+            {
+                data = data,
+                count = data.Count()
+            });
         }
 
-        // GET: api/BillOfSales/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<BillOfSale>> GetBillOfSale(int id)
-        {
-          if (_context.BillOfSale == null)
-          {
-              return NotFound();
-          }
-            var billOfSale = await _context.BillOfSale.FindAsync(id);
-
-            if (billOfSale == null)
-            {
-                return NotFound();
-            }
-
-            return billOfSale;
-        }
-
-        // PUT: api/BillOfSales/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutBillOfSale(int id, BillOfSale billOfSale)
-        {
-            if (id != billOfSale.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(billOfSale).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!BillOfSaleExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/BillOfSales
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<BillOfSale>> PostBillOfSale(BillOfSale billOfSale)
-        {
-          if (_context.BillOfSale == null)
-          {
-              return Problem("Entity set 'Web_Doan_2023Context.BillOfSale'  is null.");
-          }
-            _context.BillOfSale.Add(billOfSale);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetBillOfSale", new { id = billOfSale.Id }, billOfSale);
-        }
-
-        // DELETE: api/BillOfSales/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBillOfSale(int id)
-        {
-            if (_context.BillOfSale == null)
-            {
-                return NotFound();
-            }
-            var billOfSale = await _context.BillOfSale.FindAsync(id);
-            if (billOfSale == null)
-            {
-                return NotFound();
-            }
-
-            _context.BillOfSale.Remove(billOfSale);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
 
         private bool BillOfSaleExists(int id)
         {
-            return (_context.BillOfSale?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (db_.BillOfSale?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

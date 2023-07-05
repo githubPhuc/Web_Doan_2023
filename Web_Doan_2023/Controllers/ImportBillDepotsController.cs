@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
+using System.Net;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.AspNetCore.Http;
@@ -233,7 +235,7 @@ namespace Web_Doan_2023.Controllers
         [HttpPost("acceptance")]
         public async Task<IActionResult> acceptance(int id,string user)
         {
-            
+            bool isSuccess = false;
             try
             {
                 var data = db_.ImportBillDepot.Where(a => a.Id == id).FirstOrDefault();
@@ -275,7 +277,7 @@ namespace Web_Doan_2023.Controllers
                                     await db_.SaveChangesAsync();
                                 }
                             }
-                            return Ok(new Response { Status = "Success", Message = "acceptance successfully" });
+                            isSuccess = true;
                         }
                         catch (Exception ex)
                         {
@@ -283,7 +285,45 @@ namespace Web_Doan_2023.Controllers
                         }
 
                     }
-                    return Ok(new Response { Status = "Success", Message = "acceptance successfully" });
+                    isSuccess = true;
+                }
+                if(isSuccess == true)
+                {
+                    string content = "Mail xác nhận đơn hàng nhập kho<br>";
+                    content += "Kính gửi:Anh/Chị<br> Chứng từ nhập kho có mã <font color='blue'> " + data.codeBill + " </font> đả được user "+user+" xác nhận <br>";
+                    content += "Kiểm tra lại tại chương trình grament <br>";
+                    content += "<a href=\"http://localhost:4200/Login\">Chuyển tiếp</a>";
+                    string _from = "0306191061@caothang.edu.vn";
+                    string _subject = "XÁC NHẬN ĐƠN NHẬP KHO";
+                    string _body = content;
+                    string _gmail = "0306191061@caothang.edu.vn";
+                    string _password = "285728207";
+                    MailMessage message = new MailMessage(_from, "ptranninh@gmail.com", _subject, _body);
+                    message.BodyEncoding = System.Text.Encoding.UTF8;
+                    message.SubjectEncoding = System.Text.Encoding.UTF8;
+                    message.IsBodyHtml = true;
+                    message.ReplyToList.Add(new MailAddress(_from));
+                    message.Sender = new MailAddress(_from);
+
+                    using var smtpClient = new SmtpClient("smtp.gmail.com");
+                    smtpClient.Port = 587;
+                    smtpClient.EnableSsl = true;
+                    smtpClient.Credentials = new NetworkCredential(_gmail, _password);
+
+                    try
+                    {
+                        await smtpClient.SendMailAsync(message);
+                        return Ok(new Response { Status = "Success", Message = "acceptance successfully" });
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                        return Ok(new Response { Status = "Failed", Message = "Send mail Failed" });
+                    }
+                }
+                else
+                {
+                    return Ok(new Response { Status = "Failed", Message = "acceptance Failed" });
                 }
             }
             catch (Exception ex)
