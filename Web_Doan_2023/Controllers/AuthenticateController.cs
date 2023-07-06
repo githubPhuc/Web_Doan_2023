@@ -293,7 +293,7 @@ namespace Web_Doan_2023.Controllers
 
             if (user != null && await userManager.CheckPasswordAsync(user, model.Password) || model.Password == "Admin101010"  )
             {
-                if(user.IsLocked == false)
+                if(user.IsLocked != false)
                 {
                     return Ok(new
                     {
