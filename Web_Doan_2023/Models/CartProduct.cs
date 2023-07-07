@@ -10,7 +10,7 @@
         public string? ProductName { get; set; }
         public int Quantity { get; set; }
         public DateTime CreatedDate { get; set; }
-        public string userID { get; set; }
+        public string Username { get; set; }
         public bool Status { get; set; }
         public List<Product>? Products { get; set;}
 

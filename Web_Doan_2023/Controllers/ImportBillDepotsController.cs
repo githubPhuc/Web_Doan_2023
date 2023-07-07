@@ -29,7 +29,8 @@ namespace Web_Doan_2023.Controllers
         [HttpGet("GetList")]
         public async Task<ActionResult> GetList(string? codeBill, string?nameDepot)
         {
-            var list = (from a in db_.ImportBillDepot
+       
+        var list = (from a in db_.ImportBillDepot
                         select new
                         {
                             Id = a.Id,

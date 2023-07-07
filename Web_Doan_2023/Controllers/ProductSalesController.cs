@@ -40,8 +40,8 @@ namespace Web_Doan_2023.Controllers
                         where b.productId == id
                         select new
                         {
-                            id=a.Id,
-                            productId=b.productId,
+                            id = a.Id,
+                            productId = b.productId,
                             saleId = b.saleId,
                             nameSale = a.nameSale,
                             descriptionSale = a.descriptionSale,
@@ -78,22 +78,22 @@ namespace Web_Doan_2023.Controllers
         }
 
         [HttpPost("Update")]
-        public async Task<ActionResult> Update(Sale model,int id)
+        public async Task<ActionResult> Update(Sale model, int id)
         {
             var check = db_.Sale.Where(a => a.nameSale == model.nameSale && a.marth == model.marth).FirstOrDefault();
             if (check == null)
             {
                 try
                 {
-                    var data = db_.Sale.Where(a=>a.Id==id).FirstOrDefault();
-                    data.nameSale=model.nameSale;
-                    data.marth=model.marth;
-                    data.descriptionSale=model.descriptionSale;
-                    data.Unit=model.Unit;
-                    data.Status=model.Status;
+                    var data = db_.Sale.Where(a => a.Id == id).FirstOrDefault();
+                    data.nameSale = model.nameSale;
+                    data.marth = model.marth;
+                    data.descriptionSale = model.descriptionSale;
+                    data.Unit = model.Unit;
+                    data.Status = model.Status;
                     db_.Entry(data).State = EntityState.Modified;
                     await db_.SaveChangesAsync();
-                   
+
                     return Ok(new Response { Status = "Success", Message = "Update sale successfully!" });
                 }
                 catch (Exception ex)
@@ -108,7 +108,7 @@ namespace Web_Doan_2023.Controllers
 
         }
         [HttpPost("UpdateProductSale")]
-        public async Task<ActionResult> UpdateProductSale(int idProduct,int IdSale)
+        public async Task<ActionResult> UpdateProductSale(int idProduct, int IdSale)
         {
             var check = db_.ProductSale.Where(a => a.productId == idProduct && a.saleId == IdSale).FirstOrDefault();
             if (check == null)
@@ -116,7 +116,7 @@ namespace Web_Doan_2023.Controllers
                 try
                 {
                     check.saleId = IdSale;
-                    check.productId=idProduct;
+                    check.productId = idProduct;
                     db_.Entry(check).State = EntityState.Modified;
                     await db_.SaveChangesAsync();
 
@@ -134,10 +134,10 @@ namespace Web_Doan_2023.Controllers
 
         }
         [HttpPost("Insert")]
-        public async Task<ActionResult> Insert(Sale model,int idproduct)
+        public async Task<ActionResult> Insert(Sale model)
         {
-            var check = db_.Sale.Where(a=>a.nameSale==model.nameSale&& a.marth==model.marth).FirstOrDefault();
-            if(check == null)
+            var check = db_.Sale.Where(a => a.nameSale == model.nameSale && a.marth == model.marth).FirstOrDefault();
+            if (check == null)
             {
                 try
                 {
@@ -151,18 +151,7 @@ namespace Web_Doan_2023.Controllers
                     };
                     db_.Sale.Add(data);
                     await db_.SaveChangesAsync();
-                    if(idproduct!=null&&idproduct!=0)
-                    {
-                        var dataProSale = new ProductSale()
-                        {
-                            productId = idproduct,
-                            saleId = data.Id,
-                        };
-                        db_.ProductSale.Add(dataProSale);
-                        await db_.SaveChangesAsync();
-                        return Ok(new Response { Status = "Success", Message = "Insert product sale successfully!" });
-                    }
-                    return Ok(new Response { Status = "Success", Message = "Insert sale successfully!" });
+                    return Ok(new Response { Status = "Success", Message = "Insert Discount successfully!" });
                 }
                 catch (Exception ex)
                 {
@@ -171,9 +160,45 @@ namespace Web_Doan_2023.Controllers
             }
             else
             {
-                return Ok(new Response { Status = "Failed", Message = "Sale name is exist" });
+                return Ok(new Response { Status = "Failed", Message = "Discount name is exist" });
             }
-            
+
+        }
+        [HttpPost("AddSaleProduct")]
+        public async Task<ActionResult> AddSaleProduct(int idSale, int idProduct)
+        {
+            var dataSale = db_.Sale.FirstOrDefault(a => a.Id == idSale);
+            var dataProduct = db_.Product.FirstOrDefault(a=>a.Id == idProduct);
+            if (dataSale == null)
+            {
+                return Ok(new Response { Status = "Failed", Message = " Discount does not exist" });
+            }
+            else
+            {
+                if(dataProduct ==null)
+                {
+                    return Ok(new Response { Status = "Failed", Message = " Product does not exist" });
+                }
+                else
+                {
+                    var dataProductSale = db_.ProductSale.Where(a => a.saleId == idSale&& a.productId ==idProduct).FirstOrDefault();
+                    if(dataProductSale==null)
+                    {
+                        var data = new ProductSale()
+                        {
+                            productId = idProduct,
+                            saleId = idSale,
+                        };
+                        db_.ProductSale.Add(data);
+                        await db_.SaveChangesAsync();
+                        return Ok(new Response { Status = "Success", Message = " Insert Discount successfully" });
+                    }
+                    else
+                    {
+                        return Ok(new Response { Status = "Failed", Message = " Discount is exist" });
+                    }
+                }
+            }
         }
 
         [HttpPost("DeleteSale")]

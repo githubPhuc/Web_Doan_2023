@@ -12,8 +12,8 @@ using Web_Doan_2023.Data;
 namespace Web_Doan_2023.Migrations
 {
     [DbContext(typeof(Web_Doan_2023Context))]
-    [Migration("20230701164853_msrq1")]
-    partial class msrq1
+    [Migration("20230707031251_msr1233")]
+    partial class msr1233
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -165,11 +165,12 @@ namespace Web_Doan_2023.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StatusBill")
                         .HasColumnType("nvarchar(max)");
@@ -178,6 +179,7 @@ namespace Web_Doan_2023.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("UsernameCreate")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UsernameDelete")
@@ -189,13 +191,20 @@ namespace Web_Doan_2023.Migrations
                     b.Property<string>("code")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("createDate")
+                    b.Property<DateTime>("createDate")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("deleteDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal?>("price")
+                    b.Property<string>("phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("sumPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("sumQuantity")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("updateDate")
@@ -204,6 +213,34 @@ namespace Web_Doan_2023.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("BillOfSale");
+                });
+
+            modelBuilder.Entity("Web_Doan_2023.Models.BillOfSaleDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("IdBill")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Idproduct")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BillOfSaleDetail");
                 });
 
             modelBuilder.Entity("Web_Doan_2023.Models.CardDisplay", b =>
@@ -251,15 +288,15 @@ namespace Web_Doan_2023.Migrations
                     b.Property<bool>("Status")
                         .HasColumnType("bit");
 
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("saleID")
                         .HasColumnType("int");
 
                     b.Property<decimal?>("salePrice")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("userID")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -1000,8 +1037,8 @@ namespace Web_Doan_2023.Migrations
                     b.Property<string>("descriptionSale")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<float>("marth")
-                        .HasColumnType("real");
+                    b.Property<decimal>("marth")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("nameSale")
                         .HasColumnType("nvarchar(max)");
