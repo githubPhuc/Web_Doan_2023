@@ -298,7 +298,7 @@ namespace Web_Doan_2023.Controllers
                     string content = "Mail xác nhận đơn hàng nhập kho<br>";
                     content += "Kính gửi:Anh/Chị<br> Chứng từ nhập kho có mã <font color='blue'> " + data.codeBill + " </font> đả được user "+user+" xác nhận <br>";
                     content += "Kiểm tra lại tại chương trình grament <br>";
-                    content += "<a href=\"http://localhost:4200/Login\">Chuyển tiếp</a>";
+                    content += "<a href=\"http://localhost:4200/admin/ProductDepot\">Chuyển tiếp</a>";
                     string _from = "0306191061@caothang.edu.vn";
                     string _subject = "XÁC NHẬN ĐƠN NHẬP KHO";
                     string _body = content;
@@ -386,7 +386,7 @@ namespace Web_Doan_2023.Controllers
                     string content = "Mail xác nhận đơn hàng nhập kho đả được hủy<br>";
                     content += "Kính gửi:Anh/Chị<br> Chứng từ nhập kho có mã <font color='blue'> " + data.codeBill + " </font> đả được user " + user + " hủy <br>";
                     content += "Kiểm tra lại tại chương trình grament <br>";
-                    content += "<a href=\"http://localhost:4200/Login\">Chuyển tiếp</a>";
+                    content += "<a href=\"http://localhost:4200/admin/ProductDepot\">Chuyển tiếp</a>";
                     string _from = "0306191061@caothang.edu.vn";
                     string _subject = "HỦY ĐƠN NHẬP KHO";
                     string _body = content;

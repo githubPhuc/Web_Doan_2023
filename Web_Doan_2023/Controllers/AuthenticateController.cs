@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Mail;
@@ -383,17 +384,19 @@ namespace Web_Doan_2023.Controllers
                     claims: authClaims,
                     signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
                     );
-                return Ok(new
+                var JsonLogin = new JsonLogin()
                 {
                     token = new JwtSecurityTokenHandler().WriteToken(token),
                     expiration = token.ValidTo,
                     id = user.Id,
-                    email= user.Email,
+                    email = user.Email,
                     phone = user.PhoneNumber,
                     role = user.AccoutType,
                     username = user.UserName,
-                    name = user.Fullname
-                });
+                    name = user.Fullname,
+                };
+                string json = JsonConvert.SerializeObject(JsonLogin);
+                return Ok(json);
             }
             return Ok(new
             {

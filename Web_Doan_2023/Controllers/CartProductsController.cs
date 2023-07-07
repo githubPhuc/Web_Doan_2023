@@ -22,7 +22,7 @@ namespace Web_Doan_2023.Controllers
         }
 
         // GET: api/CartProducts
-        [HttpGet]
+        [HttpGet("GetCartProduct")]
         public async Task<IActionResult> GetCartProduct(string Username)
         {
             

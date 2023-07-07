@@ -12,8 +12,8 @@ using Web_Doan_2023.Data;
 namespace Web_Doan_2023.Migrations
 {
     [DbContext(typeof(Web_Doan_2023Context))]
-    [Migration("20230707031251_msr1233")]
-    partial class msr1233
+    [Migration("20230707071013_msr2")]
+    partial class msr2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
