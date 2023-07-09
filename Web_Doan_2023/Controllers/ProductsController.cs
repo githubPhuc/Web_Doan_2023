@@ -349,7 +349,7 @@ namespace Web_Doan_2023.Controllers
                         idCategory = model.idCategory,
                         idProducer = model.idProducer,
                         RamProduct = model.RamProduct,
-                        price = Convert.ToDecimal(model.price),
+                        price = 0,
                         SSDProduct = model.SSDProduct,
                         CPUProduct = model.CPUProduct,
                         MainProduct = model.MainProduct,//

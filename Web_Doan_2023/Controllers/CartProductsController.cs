@@ -23,24 +23,22 @@ namespace Web_Doan_2023.Controllers
 
         // GET: api/CartProducts
         [HttpGet("GetCartProduct")]
-        public async Task<IActionResult> GetCartProduct(string Username)
+        public async Task<ActionResult> GetCartProduct(string Username)
         {
-            
+
             var result = (from a in db_.CartProduct
                           join b in db_.Product on a.ProductId equals b.Id
                           where a.Username == Username
                           select new
                           {
                               Id = a.Id,
+                              Username = a.Username,
                               nameProduct = b.nameProduct,
                               ProductId = a.ProductId,
                               Quantity = a.Quantity,
-                              price = (a.salePrice == 0 ? b.price : (b.price - a.salePrice)) * a.Quantity,
+                              price = a.Price * a.Quantity,
                               salePrice = a.salePrice,
-                              image = db_.Images.Where(d => d.idProduct == a.Id).Select(d => d.PathImage).ToList().Take(1),
-                              SoLuongCart = (from a in db_.CartProduct
-                                             where a.Username == Username
-                                             select a).Count()
+
                           }).ToList();
 
             var total = result.Sum(s => s.price);
@@ -60,13 +58,13 @@ namespace Web_Doan_2023.Controllers
                           select new
                           {
                               Id = a.Id,
+                              Username = a.Username,
                               nameProduct = b.nameProduct,
                               ProductId = a.ProductId,
-                              ProductName = (a.ProductId==0 )?"":db_.Product.FirstOrDefault(c=>c.Id==a.ProductId).nameProduct,
                               Quantity = a.Quantity,
-                              price = (a.salePrice == 0 ? b.price : (b.price - a.salePrice)) * a.Quantity,
+                              price = a.Price*a.Quantity,
                               salePrice = a.salePrice,
-                            
+
                           }).ToList();
 
             var total = result.Sum(s => s.price);
@@ -78,37 +76,6 @@ namespace Web_Doan_2023.Controllers
 
         }
 
-        // PUT: api/CartProducts/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost("Update")]
-        public async Task<IActionResult> Update(int cartID, int Quantity, decimal sale = 0)
-        {
-            var cart = await db_.CartProduct.FindAsync(cartID);
-            var proid = cart.ProductId;
-            var pro = await db_.productDepot.FindAsync(proid);
-            cart.Quantity += Quantity;
-            cart.salePrice = (sale!=0?sale: cart.salePrice);
-            if (cart.Quantity == 0 || cart.Quantity > 5)
-            {
-                return BadRequest();
-            }
-            if (cart.Quantity > pro.QuantityProduct)
-            {
-                
-                return Ok(new Response { Status = "Failed", Message = "Số lượng sản phẩm không đủ!" });
-            }
-            if (cart.Quantity <= 0)
-            {
-                cart.Quantity = 0;
-            }
-            db_.Update(cart);
-            await db_.SaveChangesAsync();
-
-            return Ok(new
-            {
-                status = 200
-            });
-        }
 
         // POST: api/CartProducts
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -117,53 +84,113 @@ namespace Web_Doan_2023.Controllers
         public async Task<ActionResult<CartProduct>> addCart(int idProduct, int Quantity, string User, int idSale)
         {
             var check = await db_.CartProduct.Where(c => c.ProductId == idProduct && c.Username == User).FirstOrDefaultAsync();
-            var pro = await db_.productDepot.FindAsync(idProduct);
 
-            if (Quantity > pro.QuantityProduct)
+            var pro = db_.productDepot.FirstOrDefault(a => a.idProduct == idProduct);
+            if (pro != null)
             {
-                return Ok(new Response { Status = "Success", Message = "Add cart successfully!" });
-            }
+                if (Quantity > pro.QuantityProduct)
+                {
+                    return Ok(new Response { Status = "Failed", Message = "Insufficient inventory quantity!" });
+                }
+                else
+                {
 
-            if (check != null)
-            {
-                check.Quantity += Quantity;
-                db_.Update(check);
-                await db_.SaveChangesAsync();
+                    if (check != null)
+                    {
+
+                        if (idSale != 0)
+                        {
+                            var dataProduct = db_.Product.FirstOrDefault(b => b.Id == check.ProductId);
+                            var dataSale = (from b in db_.Sale
+                                            where b.Id == idSale
+                                            select new
+                                            {
+                                                b.Id,
+                                                b.nameSale,
+                                                b.marth,
+                                                b.Unit,
+                                                b.Status,
+                                            }).FirstOrDefault();
+                            decimal PriceSale = 0;
+                            if (dataSale != null)
+                            {
+                                if (dataSale.Unit == "VND")
+                                {
+                                    PriceSale = Convert.ToDecimal(dataProduct.price) - Convert.ToDecimal(dataSale.marth);
+                                }
+                                else if (dataSale.Unit == "%")
+                                {
+                                    PriceSale = Convert.ToDecimal(dataProduct.price) - (Convert.ToDecimal(dataProduct.price) * Convert.ToDecimal(dataSale.marth));
+                                }
+                                else
+                                {
+                                    PriceSale = Convert.ToDecimal(dataProduct.price);
+                                }
+                            }
+                            check.salePrice = PriceSale;
+                        }
+                        check.Quantity += Quantity;
+                        db_.Entry(check).State = EntityState.Modified;
+                        await db_.SaveChangesAsync();
+                        return Ok(new Response { Status = "Success", Message = "Update cart successfully!" });
+                    }
+                    else
+                    {
+                        var dataSale = (from b in db_.Sale
+                                        where b.Id == idSale
+                                        select new
+                                        {
+                                            b.Id,
+                                            b.nameSale,
+                                            b.marth,
+                                            b.Unit,
+                                            b.Status,
+                                        }).FirstOrDefault();
+                        var dataProduct = db_.Product.FirstOrDefault(b => b.Id == idProduct);
+                        if (dataProduct == null)
+                        {
+                            return Ok(new Response { Status = "Failed", Message = "Product does not exist!" });
+                        }
+                        else
+                        {
+
+                            decimal PriceSale = 0;
+                            if (dataSale != null)
+                            {
+                                if (dataSale.Unit == "VND")
+                                {
+                                    PriceSale = Convert.ToDecimal(dataProduct.price) - Convert.ToDecimal(dataSale.marth);
+                                }
+                                else if (dataSale.Unit == "%")
+                                {
+                                    PriceSale = Convert.ToDecimal(dataProduct.price) - (Convert.ToDecimal(dataProduct.price) * Convert.ToDecimal(dataSale.marth));
+                                }
+                                else
+                                {
+                                    PriceSale = Convert.ToDecimal(dataProduct.price);
+                                }
+                            }
+                            var cart = new CartProduct();
+                            cart.Username = User;
+                            cart.ProductId = idProduct;
+                            cart.Price = (decimal)dataProduct.price!;
+                            cart.Quantity = Quantity;
+                            cart.salePrice = PriceSale;
+                            cart.ProductName = dataProduct.nameProduct;
+                            cart.CreatedDate = DateTime.Now;
+                            cart.Status = true;
+                            db_.Add(cart);
+                            await db_.SaveChangesAsync();
+                            return Ok(new Response { Status = "Success", Message = "Insert cart successfully!" });
+                        }
+                    }
+                }
             }
             else
             {
-                var dataSale = (from a in db_.ProductSale
-                                join b in db_.Sale on a.saleId equals b.Id
-                                where a.productId == idProduct
-                                where a.saleId== idSale
-                               select new
-                               {
-                                   a.Id,
-                                   b.nameSale,
-                                   b.marth,
-                                   b.Unit,
-                                   b.Status,
-                               }).FirstOrDefault();
-                var dataProduct = db_.Product.FirstOrDefault(b => b.Id == idProduct);
-                if (dataProduct != null)
-                {
-                    return Ok(new Response { Status = "Failed", Message = "Sản phẩm không tồn tại!" });
-                }
-                var cart = new CartProduct();
-                cart.Username = User;
-                cart.ProductId = idProduct;
-                cart.Price = (decimal)dataProduct.price;
-                cart.Quantity = Quantity;
-                cart.salePrice = (dataSale == null || dataSale.marth == 0) ? 0 : dataSale.marth;
-                cart.ProductName = dataProduct.nameProduct;
-                cart.CreatedDate = DateTime.Now;
-                cart.Status = true;
-                db_.Add(cart);
-                await db_.SaveChangesAsync();
-                return Ok(new Response { Status = "Success", Message = "Insert cart successfully!" });
+                return Ok(new Response { Status = "Failed", Message = "No products found in stock!" });
             }
 
-            return Ok(new Response { Status = "Failed", Message = "Sản phẩm không tồn tại!" });
         }
 
         //DELETE: api/CartProducts/5

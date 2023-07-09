@@ -151,7 +151,7 @@ namespace Web_Doan_2023.Controllers
         [Route("GetUserName")]
         public async Task<IActionResult> GetUserName()
         {
-            var data = _context.Users.ToList();
+            var data = _context.Users.Where(a=>a.AccoutType=="Admin"&& a.UserName!="Admin").ToList();
 
             string UserName = "";
             if (data.Count() > 0)

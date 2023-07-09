@@ -150,19 +150,28 @@ namespace Web_Doan_2023.Controllers
                 }
                 else
                 {
-                    var data = new ImportBillDepotDetail()
+                    var checkDetail = db_.ImportBillDepotDetail.Where(a => a.BillId == checkBill.Id && a.idProduct == model.idProduct).FirstOrDefault();
+                    if(checkDetail == null)
                     {
-                        BillId = model.BillId,
-                        idProduct = model.idProduct,
-                        price = model.price,
-                        Quantity = model.Quantity,
-                    };
-                    db_.ImportBillDepotDetail.Add(data);
-                    checkBill.Quantity += model.Quantity;
-                    checkBill.Price += model.price;
-                    db_.Entry(checkBill).State = EntityState.Modified;
-                    await db_.SaveChangesAsync();
-                    return Ok(new Response { Status = "Success", Message = "Insert successfully!" });
+                        var data = new ImportBillDepotDetail()
+                        {
+                            BillId = model.BillId,
+                            idProduct = model.idProduct,
+                            price = model.price,
+                            Quantity = model.Quantity,
+                        };
+                        db_.ImportBillDepotDetail.Add(data);
+                        checkBill.Quantity += model.Quantity;
+                        checkBill.Price += model.price;
+                        db_.Entry(checkBill).State = EntityState.Modified;
+                        await db_.SaveChangesAsync();
+                        return Ok(new Response { Status = "Success", Message = "Insert successfully!" });
+                    }
+                    else
+                    {
+                        return Ok(new Response { Status = "Failed", Message = "Details of inventory receipts!" });
+                    }
+                    
                 }
             }
             catch (Exception ex)
@@ -273,7 +282,7 @@ namespace Web_Doan_2023.Controllers
                                 }
                                 else
                                 {
-                                    check_ProductDepot.QuantityProduct = item.Quantity;
+                                    check_ProductDepot.QuantityProduct += item.Quantity;
                                     db_.Entry(check_ProductDepot).State = EntityState.Modified;
                                     await db_.SaveChangesAsync();
                                 }
