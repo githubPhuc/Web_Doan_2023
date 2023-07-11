@@ -467,7 +467,7 @@ namespace Web_Doan_2023.Controllers
                     {
                         await userManager.AddToRoleAsync(user, User_role.Admin);
                     }
-                    return Ok(new Response { Status = "Success", Message = "User created successfully!" });
+                    return Ok(new Response { Status = "Success", Message = "Registered successfully! Please check mail to enable your account!" });
 
                 }
             }
@@ -532,7 +532,7 @@ namespace Web_Doan_2023.Controllers
                             await userManager.AddToRoleAsync(user, User_role.Admin);
                         }
                         string content = "Welcome to join the PT . Store management team <br>";
-                        content += "This is your account <font color='blue'> " + model.FullName + " </font> của bạn <br>";
+                        content += "This is your account <font color='blue'> " + model.FullName + " </font> <br>";
                         content += "Username: " + model.Username + "<br>";
                         content += "Passwork: " + model.Password + "<br>";
                         content += "<a href=\"http://localhost:4200/Login\">Forward to login page</a>";
@@ -556,7 +556,7 @@ namespace Web_Doan_2023.Controllers
                         try
                         {
                             await smtpClient.SendMailAsync(message);
-                            return Ok(new Response { Status = "Success", Message = "User created successfully!" });
+                            return Ok(new Response { Status = "Success", Message = "Registered successfully! Please check mail to enable your account!" });
                         }
                         catch (Exception e)
                         {

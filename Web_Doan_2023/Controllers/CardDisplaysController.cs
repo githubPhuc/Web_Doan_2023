@@ -21,6 +21,7 @@ namespace Web_Doan_2023.Controllers
         {
             db_ = context;
         }
+        
         // GET: api/Cities
         [HttpGet]
         public async Task<IActionResult> GetCardDisplay(string? name)

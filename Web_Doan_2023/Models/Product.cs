@@ -9,6 +9,7 @@
         public int idCategory { get; set; }
         public int idProducer { get; set; }// nhà sản xuất
         public decimal? price { get; set; }
+        public int? IdDepot { get; set; }
         public int RamProduct { get; set; }
         public int SSDProduct { get; set; }
         public int CPUProduct { get; set; }

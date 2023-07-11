@@ -31,6 +31,7 @@ namespace Web_Doan_2023.Controllers
                             idDepot = a.idDepot,
                             nameDepot = (a.idDepot == 0|| a.idDepot==null)?"":db_.Depot.Where(c=>c.Id==a.idDepot).FirstOrDefault().nameDepot,
                             idProduct=  a.idProduct,
+                            price=a.price,
                             nameProduct = (a.idProduct == 0 || a.idProduct == null) ? "" : db_.Product.Where(c => c.Id == a.idProduct).FirstOrDefault().nameProduct,
                             QuantityProduct = a.QuantityProduct,
                         }).ToList();
@@ -42,11 +43,25 @@ namespace Web_Doan_2023.Controllers
                 count = data.Count()
             });
         }
-        //[HttpPost("UpdateProduct")]
-        //public async Task<ActionResult> UpdateProduct()
-        //{
-        //    return Ok(new Response { Status = "Failed", Message = "Data is null!" });
-        //}
+        [HttpPost("SetPriceOnProduct")]
+        public async Task<ActionResult> SetPriceOnProduct(int id)
+        {
+            var data = db_.productDepot.Where(a => a.Id == id).FirstOrDefault();
+            if(data == null)
+            {
+                return Ok(new Response { Status = "Failed", Message = "Data is null!" });
+            }
+            else
+            {
+                var dataPro = db_.Product.Where(a => a.Id == data.idProduct).FirstOrDefault();
+                dataPro.price = data.price;
+                dataPro.IdDepot = data.idDepot;
+                db_.Entry(dataPro).State = EntityState.Modified;
+                await db_.SaveChangesAsync();
+                return Ok(new Response { Status = "Success", Message = "Update price successfully!" });
+            }
+            
+        }
 
         private bool productDepotExists(int id)
         {

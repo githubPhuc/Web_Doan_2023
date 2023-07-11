@@ -349,7 +349,6 @@ namespace Web_Doan_2023.Controllers
                         idCategory = model.idCategory,
                         idProducer = model.idProducer,
                         RamProduct = model.RamProduct,
-                        price = 0,
                         SSDProduct = model.SSDProduct,
                         CPUProduct = model.CPUProduct,
                         MainProduct = model.MainProduct,//
@@ -359,7 +358,7 @@ namespace Web_Doan_2023.Controllers
                         CardDisplay = model.CardDisplay,
                         AccessoriesIncluded = model.AccessoriesIncluded,
                         Status = false,
-                        idSale = model.idSale,
+                        idSale = null,
                         IsDelete = false,
                     };
                     db_.Product.Add(data);
@@ -403,12 +402,12 @@ namespace Web_Doan_2023.Controllers
                 {
                     var data = db_.Product.Where(a => a.Id == id).FirstOrDefault();
                     data.codeProduct = codeproduct;
+                    data.Description = model.Description;
                     data.nameProduct = model.nameProduct;
                     data.Description = model.Description;
                     data.idCategory = model.idCategory;
                     data.idProducer = model.idProducer;
                     data.RamProduct = model.RamProduct;
-                    data.price = Convert.ToDecimal(model.price);
                     data.SSDProduct = model.SSDProduct;
                     data.CPUProduct = model.CPUProduct;
                     data.MainProduct = model.MainProduct;

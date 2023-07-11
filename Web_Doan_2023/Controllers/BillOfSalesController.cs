@@ -12,6 +12,7 @@ using Web_Doan_2023.Data;
 using Web_Doan_2023.Models;
 using System.Globalization;
 using Microsoft.IdentityModel.Tokens;
+using System.Data;
 
 namespace Web_Doan_2023.Controllers
 {
@@ -25,10 +26,9 @@ namespace Web_Doan_2023.Controllers
         {
             db_ = context;
         }
-
         // GET: api/BillOfSales
         [HttpGet("GetList")]
-        public async Task<ActionResult> GetList(string? code)
+        public async Task<ActionResult> GetList(string? code, string? Status)
         {
             var list = (from a in db_.BillOfSale
                         where a.IsDelete == false
@@ -50,7 +50,8 @@ namespace Web_Doan_2023.Controllers
                             StatusBill = a.StatusBill,
                             StatusCode = a.StatusCode,
                         }).ToList();
-            var data = list.Where(a=>(code==null||code==""||a.code.ToUpper().Contains(code.ToUpper()))).ToList();
+            var data = list.Where(a=>(code==null||code==""||a.code.ToUpper().Contains(code.ToUpper()))&&
+                                      Status == null || Status == ""||Status== "undefined" || a.StatusBill.Contains(Status)).ToList();
             return Ok(new
             {
                 data = data,
@@ -80,7 +81,7 @@ namespace Web_Doan_2023.Controllers
             });
         }
         [HttpGet("SalesReport")]
-        public async Task<ActionResult> SalesReport(string?start , string? End)
+        public async Task<ActionResult> SalesReport(string?start , string? End,string?Status)
         {
             CultureInfo cul = CultureInfo.GetCultureInfo("en-GB");
             var _NgayBatDau = new DateTime();
@@ -116,6 +117,7 @@ namespace Web_Doan_2023.Controllers
            
 
             var list = (from a in db_.BillOfSale
+                        where Status == null || Status == "" || a.StatusBill.Contains(Status)
                         select new
                         {
                             Id = a.Id,
@@ -133,10 +135,11 @@ namespace Web_Doan_2023.Controllers
                             IsDelete = a.IsDelete,
                             StatusBill = a.StatusBill,
                             StatusCode = a.StatusCode,
+                            Status = a.Status,
 
                         }).ToList();
 
-            if (_NgayBD < _NgayKT)
+            if (_NgayBD!=null&&_NgayBatDau < _NgayKT&& _NgayKT!=null)
             {
                 var data = list.Where(a => a.createDate >= _NgayBD && a.createDate <= _NgayKT).ToList();
                 return Ok(new
@@ -182,7 +185,7 @@ namespace Web_Doan_2023.Controllers
             return Code;
         }
         [HttpPost("CreateDetailBillOfSale")]
-        public async Task<ActionResult> CreateDetailBillOfSale(string user,string Address,string phone)
+        public async Task<ActionResult> CreateDetailBillOfSale(string user,string Address,string phone,bool cod)
         {
             var dataUser = db_.Users.Where(a => a.UserName == user).FirstOrDefault();
             bool isSuccess = false;
@@ -201,11 +204,19 @@ namespace Web_Doan_2023.Controllers
                         createDate = DateTime.Now,
                         sumQuantity = 0,
                         sumPrice = 0,
-                        StatusBill = isStatus.waitForConfirmation,
-                        StatusCode = true,
+                        StatusCode = cod,
                         IsDelete = false,
+                        Status = false,
 
                     };
+                    if(cod==true)
+                    {
+                        dataBill.StatusBill = isStatus.Confirmed;
+                    }
+                    else
+                    {
+                        dataBill.StatusBill = isStatus.waitForConfirmation;
+                    }
                     db_.BillOfSale.Add(dataBill);
                     await db_.SaveChangesAsync();
                     foreach (var item in dataCart)
@@ -260,17 +271,17 @@ namespace Web_Doan_2023.Controllers
                     }
                     if(isSuccess== true)
                     {
-                        string content = "mail Xác nhận đơn hàng<br>";
+                        string content = "ĐẶT ĐƠN HÀNG THÀNH CÔNG<br>";
                         content += "Kính gửi:Anh/Chị<br> Đả tin tưởng và ủng hộ.<br> Đây là mã đơn hàng của bạn <font color='blue'> " + code + " </font>";
                         content += "<br> Thời gian đặt đơn là " + DateTime.Now + " xác nhận <br>";
-                        content += "<br>Vui lòng xác nhận đơn hàng<br>";
+                        content += "<br>Trạng thái đơn hàng:"+ dataBill.StatusBill + "<br>";
                         content += "<a href=\"http://localhost:4200/Login\">Xác nhận đơn hàng</a>";
                         string _from = "0306191061@caothang.edu.vn";
-                        string _subject = "Shop nhận đơn";
+                        string _subject = "TRẠNG THÁI ĐƠN HÀNG";
                         string _body = content;
                         string _gmail = "0306191061@caothang.edu.vn";
                         string _password = "285728207";
-                        MailMessage message = new MailMessage(_from, "ptranninh@gmail.com", _subject, _body);
+                        MailMessage message = new MailMessage(_from, dataUser.Email, _subject, _body);
                         message.BodyEncoding = System.Text.Encoding.UTF8;
                         message.SubjectEncoding = System.Text.Encoding.UTF8;
                         message.IsBodyHtml = true;
@@ -312,7 +323,7 @@ namespace Web_Doan_2023.Controllers
             }
         }
         [HttpPost("acceptance")]
-        public async Task<ActionResult> acceptance(int id, string Username)
+        public async Task<ActionResult> acceptance(int id, string Username,string Status)
         {
             
             var data = db_.BillOfSale.Where(a => a.Id == id).FirstOrDefault();
@@ -322,46 +333,103 @@ namespace Web_Doan_2023.Controllers
             }
             else
             {
-                if(data.IsDelete==true)
+                if (data.IsDelete == true)
                 {
                     return Ok(new Response { Status = "Failed", Message = "The invoice has been deleted" });
                 }
                 else
                 {
-                    var dataDetail = db_.BillOfSaleDetail.Where(a => a.IdBill == data.Id).ToList();
-                    if (dataDetail.Count > 0)
+
+                    if (Status == isStatus.Confirmed
+                        && data.StatusBill != isStatus.DeliverySuccessful
+                        && data.StatusBill != isStatus.PackingGoods
+                        && data.StatusBill != isStatus.SwitchToA_DedicatedTransportUnit
+                        && data.StatusBill != isStatus.DeliveryInProgress)// đả xác nhận
                     {
-                        foreach(var item in dataDetail)
+                        data.UsernameUpdate = Username;
+                        data.updateDate = DateTime.Now;
+                        data.StatusBill = isStatus.Confirmed;
+                    }
+                    else if (Status == isStatus.PackingGoods
+                        && data.StatusBill != isStatus.waitForConfirmation
+                        && data.StatusBill != isStatus.DeliverySuccessful
+                        && data.StatusBill != isStatus.SwitchToA_DedicatedTransportUnit
+                        && data.StatusBill != isStatus.DeliveryInProgress)// đang gói hàng
+                    {
+                        data.UsernameUpdate = Username;
+                        data.updateDate = DateTime.Now;
+                        data.StatusBill = isStatus.PackingGoods;
+                        var dataDetail = db_.BillOfSaleDetail.Where(a => a.IdBill == data.Id).ToList();
+                        if (dataDetail.Count > 0)
                         {
-                            var dataProductDepot = db_.productDepot.Where(a => a.idProduct == item.Idproduct).FirstOrDefault();
-                            dataProductDepot.QuantityProduct -= item.Quantity;
-                            db_.Entry(dataProductDepot).State = EntityState.Modified;
-                            await db_.SaveChangesAsync();
+                            foreach (var item in dataDetail)
+                            {
+                                var dataProduct = db_.Product.Where(a => a.Id == item.Idproduct).FirstOrDefault();
+                                var dataProductDepot = db_.productDepot.Where(a => a.idProduct == item.Idproduct&&a.idDepot== dataProduct.IdDepot).FirstOrDefault();
+                                dataProductDepot.QuantityProduct -= item.Quantity;
+                                db_.Entry(dataProductDepot).State = EntityState.Modified;
+                                await db_.SaveChangesAsync();
+                            }
                         }
+                        else
+                        {
+
+                            return Ok(new Response { Status = "Failed", Message = "Invoice details not found" });
+                        }
+                    }
+                    else if (Status == isStatus.SwitchToA_DedicatedTransportUnit
+                        && data.StatusBill != isStatus.waitForConfirmation
+                        && data.StatusBill != isStatus.Confirmed
+                        && data.StatusBill != isStatus.SwitchToA_DedicatedTransportUnit
+                        && data.StatusBill != isStatus.DeliveryInProgress)// giao đươn vị vận chuyển
+                    {
+                        data.UsernameUpdate = Username;
+                        data.updateDate = DateTime.Now;
+                        data.StatusBill = isStatus.SwitchToA_DedicatedTransportUnit;
+                    }
+                    else if (Status == isStatus.DeliveryInProgress
+                        && data.StatusBill != isStatus.waitForConfirmation
+                        && data.StatusBill != isStatus.Confirmed
+                        && data.StatusBill != isStatus.PackingGoods
+                        && data.StatusBill != isStatus.DeliveryInProgress)//đang giao hàng
+                    {
+                        data.UsernameUpdate = Username;
+                        data.updateDate = DateTime.Now;
+                        data.StatusBill = isStatus.DeliveryInProgress;
+                    }
+                    else if (Status == isStatus.DeliveryInProgress
+                        && data.StatusBill != isStatus.waitForConfirmation
+                        && data.StatusBill != isStatus.Confirmed
+                        && data.StatusBill != isStatus.PackingGoods
+                        && data.StatusBill != isStatus.SwitchToA_DedicatedTransportUnit)// giao hàng thành công
+                    {
+                        data.UsernameUpdate = Username;
+                        data.updateDate = DateTime.Now;
+                        data.StatusBill = isStatus.DeliverySuccessful;
+                        data.Status = true;
+                        data.StatusCode = true;
                     }
                     else
                     {
-                        return Ok(new Response { Status = "Failed", Message = "Invoice details not found" });
+                        return Ok(new Response { Status = "Failed", Message = "Status Error :"+ Status });
                     }
-
-                    data.StatusBill = isStatus.Approve;
-                    data.UsernameUpdate = Username;
-                    data.updateDate = DateTime.Now;
                     db_.Entry(data).State = EntityState.Modified;
                     await db_.SaveChangesAsync();
-                    string content = "mail Xác nhận đơn hàng<br>";
-                    content += "Kính gửi:Anh/Chị<br> Đả tin tưởng và ủng hộ.<br> Mã đơn hàng của bạn <font color='blue'> " + data.code + " </font> đã được phê duyệt";
+                    var dataUser = db_.Users.FirstOrDefault(a => a.UserName == data.UsernameCreate);
+                    string content = "Đơn hàng đả được chuyển đến bước tiếp theo<br>";
+                    content += "Kính gửi:Anh/Chị<br> Đả tin tưởng và ủng hộ.<br> Mã đơn hàng của bạn <font color='red'> " + data.code + " </font> đã được phê duyệt";
                     content += "<br> Thời gian đặt đơn là " + data.createDate + " <br>";
                     content += "<br> Thời gian đơn được duyệt là " + DateTime.Now + "  <br>";
                     content += "<br> Số lượng sản phẩm là " + data.sumQuantity + " món <br>";
                     content += "<br> Tổng tiền là " + data.sumPrice + " VND <br>";
+                    content += "<br> Trạng thái đơn hàng là <font color='blue'>" + data.StatusBill + " </font> <br>";
                     content += "<a href=\"http://localhost:4200/Login\">Kiểm tra đơn hàng</a>";
                     string _from = "0306191061@caothang.edu.vn";
-                    string _subject = "Shop xác nhận đơn";
+                    string _subject = "TRẠNG THÁI ĐƠN HÀNG";
                     string _body = content;
                     string _gmail = "0306191061@caothang.edu.vn";
                     string _password = "285728207";
-                    MailMessage message = new MailMessage(_from, "ptranninh@gmail.com", _subject, _body);
+                    MailMessage message = new MailMessage(_from, dataUser!.Email, _subject, _body);
                     message.BodyEncoding = System.Text.Encoding.UTF8;
                     message.SubjectEncoding = System.Text.Encoding.UTF8;
                     message.IsBodyHtml = true;
@@ -383,13 +451,14 @@ namespace Web_Doan_2023.Controllers
                         Console.WriteLine(e.Message);
                         return Ok(new Response { Status = "Failed", Message = "Send mail Failed" });
                     }
+
                 }
             }
         }
         [HttpPost("Delete")]
         public async Task<ActionResult> Delete(int id,string Username)
         {
-
+            var dataUser = db_.Users.FirstOrDefault(a => a.UserName == Username);
             var data = db_.BillOfSale.Where(a => a.Id == id).FirstOrDefault();
             if (data == null)
             {
@@ -401,9 +470,9 @@ namespace Web_Doan_2023.Controllers
                 {
                     return Ok(new Response { Status = "Failed", Message = "The invoice has been deleted" });
                 }
-                if (data.StatusBill == isStatus.Approve)
+                if (data.StatusBill != isStatus.waitForConfirmation)
                 {
-                    return Ok(new Response { Status = "Failed", Message = "Order has been approved" });
+                    return Ok(new Response { Status = "Failed", Message = "Order has been " +data.StatusBill});
                 }
                 else
                 {
@@ -434,7 +503,7 @@ namespace Web_Doan_2023.Controllers
                     string _body = content;
                     string _gmail = "0306191061@caothang.edu.vn";
                     string _password = "285728207";
-                    MailMessage message = new MailMessage(_from, "ptranninh@gmail.com", _subject, _body);
+                    MailMessage message = new MailMessage(_from, dataUser!.Email, _subject, _body);
                     message.BodyEncoding = System.Text.Encoding.UTF8;
                     message.SubjectEncoding = System.Text.Encoding.UTF8;
                     message.IsBodyHtml = true;

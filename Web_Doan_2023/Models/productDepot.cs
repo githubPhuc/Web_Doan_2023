@@ -6,5 +6,6 @@
         public int idProduct { get; set; }
         public int idDepot { get; set; }
         public int QuantityProduct { get; set; }
+        public decimal price { get; set; }
     }
 }

@@ -18,7 +18,8 @@ namespace Web_Doan_2023.Models
         public string? UsernameUpdate { get; set;}
         public string? UsernameDelete { get; set; }
         public string? StatusBill { get; set; }// trạng thái đơn hàng( đang xác nhận, đang lấy hàng, đang đợi vận chuyển, đang chuyển hàng, chờ thanh toán, đả thanh toán, hoành thành đơn)
-        public bool StatusCode { get; set; }//trạng thái hoàn thành, thất bại
+        public bool StatusCode { get; set; }//trạng thái thanh toán
+        public bool Status { get; set; }// trang thais giao hangf thanhf coong
         public bool IsDelete { get; set; }
 
     }

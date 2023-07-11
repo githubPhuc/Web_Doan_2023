@@ -46,5 +46,6 @@ namespace Web_Doan_2023.Data
         public DbSet<Web_Doan_2023.Models.CommentProduct>? CommentProduct { get; set; }
         public DbSet<Web_Doan_2023.Models.ProductSale>? ProductSale { get; set; }
         public DbSet<Web_Doan_2023.Models.ImportBillDepotDetail>? ImportBillDepotDetail { get; set; }
+        public DbSet<Web_Doan_2023.Models.StatusInvoice>? StatusInvoice { get; set; }
     }
 }

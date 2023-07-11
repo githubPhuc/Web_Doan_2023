@@ -12,8 +12,8 @@ using Web_Doan_2023.Data;
 namespace Web_Doan_2023.Migrations
 {
     [DbContext(typeof(Web_Doan_2023Context))]
-    [Migration("20230709061046_msa1")]
-    partial class msa1
+    [Migration("20230711113617_msj1")]
+    partial class msj1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -170,6 +170,9 @@ namespace Web_Doan_2023.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDelete")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Status")
                         .HasColumnType("bit");
 
                     b.Property<string>("StatusBill")
@@ -904,6 +907,9 @@ namespace Web_Doan_2023.Migrations
                     b.Property<int>("DisplayProduct")
                         .HasColumnType("int");
 
+                    b.Property<int?>("IdDepot")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
 
@@ -972,6 +978,9 @@ namespace Web_Doan_2023.Migrations
 
                     b.Property<int>("idProduct")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("price")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -1068,6 +1077,27 @@ namespace Web_Doan_2023.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SsdProduct");
+                });
+
+            modelBuilder.Entity("Web_Doan_2023.Models.StatusInvoice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StatusInvoice");
                 });
 
             modelBuilder.Entity("Web_Doan_2023.Models.User", b =>
