@@ -27,14 +27,16 @@ namespace Web_Doan_2023.Controllers
         {
 
             var result = (from a in db_.CartProduct
-                          join b in db_.Product on a.ProductId equals b.Id
+                          join b in db_.productDepot on a.ShipmentCode equals b.ShipmentCode
+                          join c in db_.Product on b.idProduct equals c.Id
                           where a.Username == Username
                           select new
                           {
                               Id = a.Id,
                               Username = a.Username,
-                              nameProduct = b.nameProduct,
-                              ProductId = a.ProductId,
+                              nameProduct = c.nameProduct,
+                              idProductDeport = b.Id,
+                              ShipmentCode=a.ShipmentCode,
                               Quantity = a.Quantity,
                               price = a.Price * a.Quantity,
                               salePrice = a.salePrice,
@@ -49,43 +51,18 @@ namespace Web_Doan_2023.Controllers
             });
 
         }
-        [HttpGet("GetList")]
-        public async Task<IActionResult> GetList()
-        {
-
-            var result = (from a in db_.CartProduct
-                          join b in db_.Product on a.ProductId equals b.Id
-                          select new
-                          {
-                              Id = a.Id,
-                              Username = a.Username,
-                              nameProduct = b.nameProduct,
-                              ProductId = a.ProductId,
-                              Quantity = a.Quantity,
-                              price = a.Price*a.Quantity,
-                              salePrice = a.salePrice,
-
-                          }).ToList();
-
-            var total = result.Sum(s => s.price);
-            return Ok(new
-            {
-                cart = result,
-                total = total,
-            });
-
-        }
+        
 
 
         // POST: api/CartProducts
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Route("addCart")]
-        public async Task<ActionResult<CartProduct>> addCart(int idProduct, int Quantity, string User, int idSale)
+        public async Task<ActionResult> addCart(string ShipmentCode, int Quantity, string User, int idSale)
         {
-            var check = await db_.CartProduct.Where(c => c.ProductId == idProduct && c.Username == User).FirstOrDefaultAsync();
+            var pro = db_.productDepot.FirstOrDefault(a => a.ShipmentCode == ShipmentCode);
+            var check = await db_.CartProduct.Where(c => c.ShipmentCode == pro.ShipmentCode && c.Username == User).FirstOrDefaultAsync();
 
-            var pro = db_.productDepot.FirstOrDefault(a => a.idProduct == idProduct);
             if (pro != null)
             {
                 if (Quantity > pro.QuantityProduct)
@@ -100,7 +77,7 @@ namespace Web_Doan_2023.Controllers
 
                         if (idSale != 0)
                         {
-                            var dataProduct = db_.Product.FirstOrDefault(b => b.Id == check.ProductId);
+                            //var dataProduct = db_.productDepot.FirstOrDefault(b => b.ShipmentCode == check.ShipmentCode);
                             var dataSale = (from b in db_.Sale
                                             where b.Id == idSale
                                             select new
@@ -116,15 +93,15 @@ namespace Web_Doan_2023.Controllers
                             {
                                 if (dataSale.Unit == "VND")
                                 {
-                                    PriceSale = Convert.ToDecimal(dataProduct.price) - Convert.ToDecimal(dataSale.marth);
+                                    PriceSale = Convert.ToDecimal(pro.priceSale) - Convert.ToDecimal(dataSale.marth);
                                 }
                                 else if (dataSale.Unit == "%")
                                 {
-                                    PriceSale = Convert.ToDecimal(dataProduct.price) - (Convert.ToDecimal(dataProduct.price) * Convert.ToDecimal(dataSale.marth));
+                                    PriceSale = Convert.ToDecimal(pro.priceSale) - (Convert.ToDecimal(pro.priceSale) * Convert.ToDecimal(dataSale.marth));
                                 }
                                 else
                                 {
-                                    PriceSale = Convert.ToDecimal(dataProduct.price);
+                                    PriceSale = Convert.ToDecimal(pro.priceSale);
                                 }
                             }
                             check.salePrice = PriceSale;
@@ -146,43 +123,36 @@ namespace Web_Doan_2023.Controllers
                                             b.Unit,
                                             b.Status,
                                         }).FirstOrDefault();
-                        var dataProduct = db_.Product.FirstOrDefault(b => b.Id == idProduct);
-                        if (dataProduct == null)
-                        {
-                            return Ok(new Response { Status = "Failed", Message = "Product does not exist!" });
-                        }
-                        else
-                        {
-
+                       
+                        
                             decimal PriceSale = 0;
                             if (dataSale != null)
                             {
                                 if (dataSale.Unit == "VND")
                                 {
-                                    PriceSale = Convert.ToDecimal(dataProduct.price) - Convert.ToDecimal(dataSale.marth);
+                                    PriceSale = Convert.ToDecimal(pro.priceSale) - Convert.ToDecimal(dataSale.marth);
                                 }
                                 else if (dataSale.Unit == "%")
                                 {
-                                    PriceSale = Convert.ToDecimal(dataProduct.price) - (Convert.ToDecimal(dataProduct.price) * Convert.ToDecimal(dataSale.marth));
+                                    PriceSale = Convert.ToDecimal(pro.priceSale) - (Convert.ToDecimal(pro.priceSale) * Convert.ToDecimal(dataSale.marth));
                                 }
                                 else
                                 {
-                                    PriceSale = Convert.ToDecimal(dataProduct.price);
+                                    PriceSale = Convert.ToDecimal(pro.priceSale);
                                 }
                             }
                             var cart = new CartProduct();
                             cart.Username = User;
-                            cart.ProductId = idProduct;
-                            cart.Price = (decimal)dataProduct.price!;
+                            cart.ShipmentCode = ShipmentCode;
+                            cart.Price = (decimal)pro.priceSale!;
                             cart.Quantity = Quantity;
                             cart.salePrice = PriceSale;
-                            cart.ProductName = dataProduct.nameProduct;
                             cart.CreatedDate = DateTime.Now;
                             cart.Status = true;
                             db_.Add(cart);
                             await db_.SaveChangesAsync();
                             return Ok(new Response { Status = "Success", Message = "Insert cart successfully!" });
-                        }
+                        
                     }
                 }
             }

@@ -242,6 +242,7 @@ namespace Web_Doan_2023.Controllers
                 return Ok(new Response { Status = "Failed", Message = ex.Message });
             }
         }
+        
         [HttpPost("acceptance")]
         public async Task<IActionResult> acceptance(int id,string user)
         {
@@ -268,29 +269,22 @@ namespace Web_Doan_2023.Controllers
                         {
                             foreach (var item in data_billDetail)
                             {
-                                var check_ProductDepot = db_.productDepot.Where(a => a.idProduct == item.idProduct && a.idDepot == data.IdDepot).FirstOrDefault();
-                                if (check_ProductDepot == null)
-                                {
-                                    var data_productDepot = new productDepot()
-                                    {
-                                        price=item.price,
-                                        idProduct = item.idProduct,
-                                        idDepot = data.IdDepot,
-                                        QuantityProduct = item.Quantity,
-                                    };
-                                    db_.productDepot.Add(data_productDepot);
-                                    db_.SaveChanges();
-                                }
-                                else
-                                {
-                                    check_ProductDepot.QuantityProduct += item.Quantity;
-                                    db_.Entry(check_ProductDepot).State = EntityState.Modified;
-                                    await db_.SaveChangesAsync();
-                                }
                                 var data_Product = db_.Product.Where(a => a.Id == item.idProduct).FirstOrDefault();
-                                data_Product.Status = true;
-                                db_.Entry(data_Product).State = EntityState.Modified;
-                                await db_.SaveChangesAsync();
+                                string Code = data.Id.ToString() + "-" + data_Product.codeProduct;
+                                var data_productDepot = new productDepot()
+                                {
+                                    ShipmentCode = Code,
+                                    price = item.price,
+                                    priceSale = 0,
+                                    idProduct = item.idProduct,
+                                    idDepot = data.IdDepot,
+                                    QuantityProduct = item.Quantity,
+                                    status = false,
+                                    DateCreate= DateTime.Now,
+                                };
+                                db_.productDepot.Add(data_productDepot);
+                                db_.SaveChanges();
+
                             }
                             isSuccess = true;
                         }
@@ -300,7 +294,12 @@ namespace Web_Doan_2023.Controllers
                         }
 
                     }
-                    isSuccess = true;
+                    else
+                    {
+                        isSuccess = false;
+                        return Ok(new Response { Status = "Failed", Message = "Input details not found!!" });
+                    }
+                    
                 }
                 if(isSuccess == true)
                 {
@@ -374,9 +373,6 @@ namespace Web_Doan_2023.Controllers
                             {
                                 var check_ProductDepot = db_.productDepot.Where(a => a.idProduct == item.idProduct && a.idDepot == data.IdDepot).FirstOrDefault();
                                 db_.Remove(check_ProductDepot);
-                                var data_Product = db_.Product.Where(a => a.Id == item.idProduct).FirstOrDefault();
-                                data_Product.Status = false;
-                                db_.Entry(data_Product).State = EntityState.Modified;
                                 await db_.SaveChangesAsync();
                             }
                             isSuccess = true;

@@ -6,8 +6,7 @@
         public decimal Price { get; set; }
         public int? saleID { get; set; }
         public decimal? salePrice { get; set; }
-        public int ProductId { get; set; }
-        public string? ProductName { get; set; }
+        public string ShipmentCode { get; set; }
         public int Quantity { get; set; }
         public DateTime CreatedDate { get; set; }
         public string Username { get; set; }

@@ -221,7 +221,7 @@ namespace Web_Doan_2023.Controllers
                     await db_.SaveChangesAsync();
                     foreach (var item in dataCart)
                     {
-                        var dataProductDepot = db_.productDepot.Where(a => a.idProduct == item.ProductId).FirstOrDefault();
+                        var dataProductDepot = db_.productDepot.Where(a => a.ShipmentCode == item.ShipmentCode).FirstOrDefault();
                         if (dataProductDepot == null)
                         {
                             return Ok(new Response { Status = "Failed", Message = " Products not yet in stock" });
@@ -234,13 +234,13 @@ namespace Web_Doan_2023.Controllers
                             }
                             else
                             {
-                                var checkDetailBill = db_.BillOfSaleDetail.Where(a => a.Idproduct == item.ProductId&& a.IdBill==dataBill.Id).FirstOrDefault();
+                                var checkDetailBill = db_.BillOfSaleDetail.Where(a => a.Idproduct == dataProductDepot.idProduct&& a.IdBill==dataBill.Id).FirstOrDefault();
                                 if (checkDetailBill == null)
                                 {
                                     var data = new BillOfSaleDetail()
                                     {
                                         IdBill = dataBill.Id,
-                                        Idproduct = item.ProductId,
+                                        Idproduct = dataProductDepot.idProduct,
                                         Quantity = item.Quantity,
                                         Price = (item.salePrice == 0) ? item.Price : Convert.ToDecimal(item.salePrice),
                                         Status = true,
