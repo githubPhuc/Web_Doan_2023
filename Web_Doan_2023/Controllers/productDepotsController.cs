@@ -147,7 +147,12 @@ namespace Web_Doan_2023.Controllers
                     return Ok(new Response { Status = "Failed", Message = "Price has not been updated! Please check again" });
                 }
             }
+        }
+        [HttpGet("inventoryDepot")]
+        public async Task<ActionResult> inventoryDepot()
+        {
 
+            return Ok(new Response { Status = "Failed", Message = "Data is null!" });
         }
 
         private bool productDepotExists(int id)
