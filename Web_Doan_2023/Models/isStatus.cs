@@ -16,7 +16,10 @@ namespace Web_Doan_2023.Models
         public const string PackingGoods = "Packing goods";//3 đang gói hàng
         public const string SwitchToA_DedicatedTransportUnit = "Switch to a dedicated transport unit";//3 đang gói hàng
         public const string DeliveryInProgress = "Delivery In Progress";//4 đang giao hàng
-        public const string DeliverySuccessful = "Delivery Successful";//5 giao thanh cong
+        public const string DeliverySuccessful = "Delivery Successful";//5 giao thanh Công
+        public const string CancelBill = "Cancel Bill";//5 giao thanh Công
+
+
 
     }
 }

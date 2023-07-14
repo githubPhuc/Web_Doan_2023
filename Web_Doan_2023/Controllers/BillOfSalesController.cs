@@ -28,7 +28,7 @@ namespace Web_Doan_2023.Controllers
         }
         // GET: api/BillOfSales
         [HttpGet("GetList")]
-        public async Task<ActionResult> GetList(string? code, string? Status)
+        public async Task<ActionResult> GetList(string? code, string? Status, DateTime? start, DateTime? End)
         {
             var list = (from a in db_.BillOfSale
                         where a.IsDelete == false
@@ -50,8 +50,11 @@ namespace Web_Doan_2023.Controllers
                             StatusBill = a.StatusBill,
                             StatusCode = a.StatusCode,
                         }).ToList();
+            DateTime check = new DateTime();
             var data = list.Where(a=>(code==null||code==""||a.code.ToUpper().Contains(code.ToUpper()))&&
-                                      Status == null || Status == ""||Status== "undefined" || a.StatusBill.Contains(Status)).ToList();
+                                      (Status == null || Status == "" || Status == "undefined" || a.StatusBill.Contains(Status)) &&
+                                        (start == null || start == check || start <= a.createDate) &&
+                                        (End == null || End == check || End >= a.createDate)).ToList();
             return Ok(new
             {
                 data = data,
@@ -81,39 +84,9 @@ namespace Web_Doan_2023.Controllers
             });
         }
         [HttpGet("SalesReport")]
-        public async Task<ActionResult> SalesReport(string?start , string? End,string?Status)
+        public async Task<ActionResult> SalesReport(string?Status)
         {
-            CultureInfo cul = CultureInfo.GetCultureInfo("en-GB");
-            var _NgayBatDau = new DateTime();
-            var _NgayKetthuc = new DateTime();
-            DateTime _NgayBD = new DateTime();
-            DateTime _NgayKT = new DateTime();
-            if (!string.IsNullOrEmpty(start))
-            {
-                try
-                {
-                    _NgayBatDau = DateTime.ParseExact(start, "dd/MM/yyyy", cul);
-
-                    _NgayBD = new DateTime(_NgayBatDau.Year, _NgayBatDau.Month, _NgayBatDau.Day, 0, 0, 0);
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception(ex.Message);
-                }
-            }
-            if (!string.IsNullOrEmpty(End))
-            {
-                try
-                {
-                    _NgayKetthuc = DateTime.ParseExact(End, "dd/MM/yyyy", cul);
-
-                    _NgayKT = new DateTime(_NgayKetthuc.Year, _NgayKetthuc.Month, _NgayKetthuc.Day, 0, 0, 0);
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception(ex.Message);
-                }
-            }
+           
            
 
             var list = (from a in db_.BillOfSale
@@ -139,15 +112,7 @@ namespace Web_Doan_2023.Controllers
 
                         }).ToList();
 
-            if (_NgayBD!=null&&_NgayBatDau < _NgayKT&& _NgayKT!=null)
-            {
-                var data = list.Where(a => a.createDate >= _NgayBD && a.createDate <= _NgayKT).ToList();
-                return Ok(new
-                {
-                    data = data,
-                    count = data.Count()
-                });
-            }
+            
             return Ok(new
             {
                 data = list,
@@ -343,6 +308,7 @@ namespace Web_Doan_2023.Controllers
                     if (Status == isStatus.Confirmed
                         && data.StatusBill != isStatus.DeliverySuccessful
                         && data.StatusBill != isStatus.PackingGoods
+                        && data.StatusBill != isStatus.CancelBill
                         && data.StatusBill != isStatus.SwitchToA_DedicatedTransportUnit
                         && data.StatusBill != isStatus.DeliveryInProgress)// đả xác nhận
                     {
@@ -353,6 +319,7 @@ namespace Web_Doan_2023.Controllers
                     else if (Status == isStatus.PackingGoods
                         && data.StatusBill != isStatus.waitForConfirmation
                         && data.StatusBill != isStatus.DeliverySuccessful
+                        && data.StatusBill != isStatus.CancelBill
                         && data.StatusBill != isStatus.SwitchToA_DedicatedTransportUnit
                         && data.StatusBill != isStatus.DeliveryInProgress)// đang gói hàng
                     {
@@ -379,6 +346,7 @@ namespace Web_Doan_2023.Controllers
                     else if (Status == isStatus.SwitchToA_DedicatedTransportUnit
                         && data.StatusBill != isStatus.waitForConfirmation
                         && data.StatusBill != isStatus.Confirmed
+                        && data.StatusBill != isStatus.CancelBill
                         && data.StatusBill != isStatus.SwitchToA_DedicatedTransportUnit
                         && data.StatusBill != isStatus.DeliveryInProgress)// giao đươn vị vận chuyển
                     {
@@ -390,6 +358,7 @@ namespace Web_Doan_2023.Controllers
                         && data.StatusBill != isStatus.waitForConfirmation
                         && data.StatusBill != isStatus.Confirmed
                         && data.StatusBill != isStatus.PackingGoods
+                        && data.StatusBill != isStatus.CancelBill
                         && data.StatusBill != isStatus.DeliveryInProgress)//đang giao hàng
                     {
                         data.UsernameUpdate = Username;
@@ -400,6 +369,7 @@ namespace Web_Doan_2023.Controllers
                         && data.StatusBill != isStatus.waitForConfirmation
                         && data.StatusBill != isStatus.Confirmed
                         && data.StatusBill != isStatus.PackingGoods
+                        && data.StatusBill != isStatus.CancelBill
                         && data.StatusBill != isStatus.SwitchToA_DedicatedTransportUnit)// giao hàng thành công
                     {
                         data.UsernameUpdate = Username;
@@ -408,6 +378,28 @@ namespace Web_Doan_2023.Controllers
                         data.Status = true;
                         data.StatusCode = true;
                     }
+                    else if(Status==isStatus.CancelBill)
+                    {
+                        data.UsernameUpdate = Username;
+                        data.updateDate = DateTime.Now;
+                        data.StatusBill = isStatus.PackingGoods;
+                        var dataDetail = db_.BillOfSaleDetail.Where(a => a.IdBill == data.Id).ToList();
+                        if (dataDetail.Count > 0)
+                        {
+                            foreach (var item in dataDetail)
+                            {
+                                var dataProductDepot = db_.productDepot.Where(a => a.ShipmentCode == item.ShipmentCode).FirstOrDefault();
+                                dataProductDepot.QuantityProduct += item.Quantity;
+                                db_.Entry(dataProductDepot).State = EntityState.Modified;
+                                await db_.SaveChangesAsync();
+                            }
+                        }
+                        else
+                        {
+
+                            return Ok(new Response { Status = "Failed", Message = "Invoice details not found" });
+                        }
+                    }
                     else
                     {
                         return Ok(new Response { Status = "Failed", Message = "Status Error :"+ Status });
@@ -415,14 +407,15 @@ namespace Web_Doan_2023.Controllers
                     db_.Entry(data).State = EntityState.Modified;
                     await db_.SaveChangesAsync();
                     var dataUser = db_.Users.FirstOrDefault(a => a.UserName == data.UsernameCreate);
-                    string content = "Đơn hàng đả được chuyển đến bước tiếp theo<br>";
+                    string content = "CHUYỂN ĐỔI TRẠNG THÁI ĐƠN HÀNG<br>";
                     content += "Kính gửi:Anh/Chị<br> Đả tin tưởng và ủng hộ.<br> Mã đơn hàng của bạn <font color='red'> " + data.code + " </font> đã được phê duyệt";
                     content += "<br> Thời gian đặt đơn là " + data.createDate + " <br>";
                     content += "<br> Thời gian đơn được duyệt là " + DateTime.Now + "  <br>";
                     content += "<br> Số lượng sản phẩm là " + data.sumQuantity + " món <br>";
                     content += "<br> Tổng tiền là " + data.sumPrice + " VND <br>";
                     content += "<br> Trạng thái đơn hàng là <font color='blue'>" + data.StatusBill + " </font> <br>";
-                    content += "<a href=\"http://localhost:4200/Login\">Kiểm tra đơn hàng</a>";
+                    content += " <br> <a href=\"http://localhost:4200/Login\">Kiểm tra đơn hàng</a>  <br>";
+                    content += " <br> Trân trọng!  <br>";
                     string _from = "0306191061@caothang.edu.vn";
                     string _subject = "TRẠNG THÁI ĐƠN HÀNG";
                     string _body = content;
