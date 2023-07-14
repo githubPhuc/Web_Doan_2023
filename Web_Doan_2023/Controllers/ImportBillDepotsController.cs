@@ -27,7 +27,7 @@ namespace Web_Doan_2023.Controllers
 
         // GET: api/ImportBillDepots
         [HttpGet("GetList")]
-        public async Task<ActionResult> GetList(string? codeBill, string?nameDepot)
+        public async Task<ActionResult> GetList(string? codeBill, string?nameDepot, DateTime? start, DateTime? End)
         {
        
         var list = (from a in db_.ImportBillDepot
@@ -47,9 +47,12 @@ namespace Web_Doan_2023.Controllers
                             IsAcceptance=a.IsAcceptance,
 
                         }).ToList();
+            DateTime check = new DateTime();
             var data = list.Where(a => 
             (codeBill == "" || codeBill == null || a.codeBill.ToUpper().Contains(codeBill.ToUpper()) &&
-            (nameDepot == "" || nameDepot == null || a.NameDepot.ToUpper().Contains(nameDepot.ToUpper())
+            (nameDepot == "" || nameDepot == null || a.NameDepot.ToUpper().Contains(nameDepot.ToUpper()) &&
+            (start == null || start == check || start <= a.CreatedDate) &&
+            (End == null || End == check || End >= a.CreatedDate)
             ))).ToList();
             return Ok(new
             {

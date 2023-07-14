@@ -4,7 +4,8 @@
     {
         public int Id { get; set; }
         public int IdBill { get; set; }
-        public int Idproduct { get; set; }
+        public int IdProduct { get; set; }
+        public string ShipmentCode { get; set; }
         public int Quantity { get; set; }
         public decimal Price { get; set; }
         public bool Status { get; set; }

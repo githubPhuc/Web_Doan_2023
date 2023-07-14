@@ -68,8 +68,8 @@ namespace Web_Doan_2023.Controllers
                             Id = a.Id,
                            Quantity = a.Quantity,
                             Price = a.Price,
-                            Idproduct = a.Idproduct,
-                            nameProduct =(a.Idproduct==0?"":db_.Product.FirstOrDefault(c=>c.Id==a.Idproduct).nameProduct),
+                            ShipmentCode = a.ShipmentCode,
+                            nameProduct =(a.IdProduct==0?"":db_.Product.FirstOrDefault(c=>c.Id==a.IdProduct).nameProduct),
                             IdBill = a.IdBill,
                             Status = a.Status,
 
@@ -234,13 +234,14 @@ namespace Web_Doan_2023.Controllers
                             }
                             else
                             {
-                                var checkDetailBill = db_.BillOfSaleDetail.Where(a => a.Idproduct == dataProductDepot.idProduct&& a.IdBill==dataBill.Id).FirstOrDefault();
+                                var checkDetailBill = db_.BillOfSaleDetail.Where(a => a.ShipmentCode == dataProductDepot.ShipmentCode&& a.IdBill==dataBill.Id).FirstOrDefault();
                                 if (checkDetailBill == null)
                                 {
                                     var data = new BillOfSaleDetail()
                                     {
+                                        IdProduct= dataProductDepot.idProduct,
                                         IdBill = dataBill.Id,
-                                        Idproduct = dataProductDepot.idProduct,
+                                        ShipmentCode= dataProductDepot.ShipmentCode,
                                         Quantity = item.Quantity,
                                         Price = (item.salePrice == 0) ? item.Price : Convert.ToDecimal(item.salePrice),
                                         Status = true,
@@ -258,7 +259,6 @@ namespace Web_Doan_2023.Controllers
                                     checkDetailBill.Quantity += item.Quantity;
                                     db_.Entry(checkDetailBill).State = EntityState.Modified;
                                     await db_.SaveChangesAsync();
-
                                     dataBill.sumQuantity += checkDetailBill.Quantity;
                                     dataBill.sumPrice += checkDetailBill.Price;
                                     db_.Entry(dataBill).State = EntityState.Modified;
@@ -364,8 +364,7 @@ namespace Web_Doan_2023.Controllers
                         {
                             foreach (var item in dataDetail)
                             {
-                                var dataProduct = db_.Product.Where(a => a.Id == item.Idproduct).FirstOrDefault();
-                                var dataProductDepot = db_.productDepot.Where(a => a.idProduct == item.Idproduct&&a.idDepot== dataProduct.IdDepot).FirstOrDefault();
+                                var dataProductDepot = db_.productDepot.Where(a => a.ShipmentCode==item.ShipmentCode).FirstOrDefault();
                                 dataProductDepot.QuantityProduct -= item.Quantity;
                                 db_.Entry(dataProductDepot).State = EntityState.Modified;
                                 await db_.SaveChangesAsync();
@@ -481,7 +480,7 @@ namespace Web_Doan_2023.Controllers
                     {
                         foreach (var item in dataDetail)
                         {
-                            var dataProductDepot = db_.productDepot.Where(a => a.idProduct == item.Idproduct).FirstOrDefault();
+                            var dataProductDepot = db_.productDepot.Where(a => a.ShipmentCode == item.ShipmentCode).FirstOrDefault();
                             dataProductDepot.QuantityProduct += item.Quantity;
                             db_.Entry(dataProductDepot).State = EntityState.Modified;
                             await db_.SaveChangesAsync();

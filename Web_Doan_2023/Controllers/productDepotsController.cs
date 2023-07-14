@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Web_Doan_2023.Data;
 using Web_Doan_2023.Models;
+using System.Globalization;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Web_Doan_2023.Controllers
 {
@@ -76,8 +73,9 @@ namespace Web_Doan_2023.Controllers
         }
         // GET: api/productDepots
         [HttpGet("GetList")]
-        public async Task<ActionResult> GetList(string? nameDepot, string? nameProduct)
+        public async Task<ActionResult> GetList(string? nameDepot, string? nameProduct, DateTime? start, DateTime? End)
         {
+            
             var List = (from a in db_.productDepot
                         select new
                         {
@@ -93,8 +91,14 @@ namespace Web_Doan_2023.Controllers
                             status = a.status,
                             DateCreate = a.DateCreate
                         }).ToList();
-            var data = List.Where(a => (nameDepot == "" || nameDepot == null || a.nameDepot.ToUpper().Contains(nameDepot.ToUpper())) &&
-            (nameProduct == "" || nameProduct == null || a.nameProduct.ToUpper().Contains(nameProduct.ToUpper()))).OrderByDescending(a=>a.DateCreate).ToList();
+            DateTime check = new DateTime();
+            var data = List.Where(a => 
+            (nameDepot == "" || nameDepot == null || a.nameDepot.ToUpper().Contains(nameDepot.ToUpper())) &&
+            (nameProduct == "" || nameProduct == null || a.nameProduct.ToUpper().Contains(nameProduct.ToUpper()))&&
+            (start == null|| start == check || start <= a.DateCreate)&&
+            (End == null || End == check || End >= a.DateCreate)
+
+           ).OrderByDescending(a=>a.DateCreate).ToList();
             return Ok(new
             {
                 acc = data,
@@ -114,7 +118,7 @@ namespace Web_Doan_2023.Controllers
                 data.priceSale = priceSale;
                 db_.Entry(data).State = EntityState.Modified;
                 await db_.SaveChangesAsync();
-                return Ok(new Response { Status = "Success", Message = "Update price successfully!" });
+                return Ok(new Response { Status = "Success", Message = "Update status view successfully!" });
             }
             
         }
@@ -151,8 +155,41 @@ namespace Web_Doan_2023.Controllers
         [HttpGet("inventoryDepot")]
         public async Task<ActionResult> inventoryDepot()
         {
-
-            return Ok(new Response { Status = "Failed", Message = "Data is null!" });
+            var data = (from a in db_.productDepot
+                        join b in db_.Product on a.idProduct equals b.Id
+                        select new
+                        {
+                            ShipmentCode = a.ShipmentCode,
+                            codeproduct = b.codeProduct,
+                            nameproduct = b.nameProduct,
+                            price = a.price,
+                            QuantityProduct = a.QuantityProduct,
+                            DateCreate = a.DateCreate,
+                            status=a.status,
+                        }).ToList();
+            double countQuantity = 0;
+            decimal countPrice = 0;
+            decimal countView = 0;
+            if (data.Count() > 0)
+            {
+                foreach (var item in data)
+                {
+                    countQuantity += item.QuantityProduct;
+                    countPrice += item.price;
+                    if (item.status == true)
+                    {
+                        countView++;
+                    }
+                }
+            }
+            return Ok(new
+            {
+                countView= countView,
+                data = data,
+                countQuantity= countQuantity,
+                countPrice = countPrice,
+                count = data.Count()
+            });
         }
 
         private bool productDepotExists(int id)
