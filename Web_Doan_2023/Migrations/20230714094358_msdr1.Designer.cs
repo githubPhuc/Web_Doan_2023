@@ -12,8 +12,8 @@ using Web_Doan_2023.Data;
 namespace Web_Doan_2023.Migrations
 {
     [DbContext(typeof(Web_Doan_2023Context))]
-    [Migration("20230713081610_msjj1")]
-    partial class msjj1
+    [Migration("20230714094358_msdr1")]
+    partial class msdr1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -229,7 +229,7 @@ namespace Web_Doan_2023.Migrations
                     b.Property<int>("IdBill")
                         .HasColumnType("int");
 
-                    b.Property<int>("Idproduct")
+                    b.Property<int>("IdProduct")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Price")
@@ -237,6 +237,10 @@ namespace Web_Doan_2023.Migrations
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
+
+                    b.Property<string>("ShipmentCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("Status")
                         .HasColumnType("bit");
